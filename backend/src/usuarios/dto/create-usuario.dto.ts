@@ -11,11 +11,7 @@ export class CreateUsuarioDto {
   @IsEmail()
   email: string;
 
-  @ApiProperty({
-    example: 'senha123',
-    description: 'Senha em texto puro; é gravada como hash no banco',
-    minLength: 6,
-  })
+  @ApiProperty({ example: 'senha123', description: 'Senha do usuário', minLength: 6 })
   @IsString()
   @MinLength(6)
   senha: string;

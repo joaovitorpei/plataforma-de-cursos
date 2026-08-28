@@ -21,8 +21,8 @@ model Usuario {
   idUsuario         Int             @id @default(autoincrement()) @map("ID_Usuario")
   nomeCompleto      String          @map("NomeCompleto")
   email             String          @unique @map("Email")
-  senhaHash         String          @map("SenhaHash")
-  dataCadastro      DateTime        @default(now()) @map("DataCadastro")
+  senha             String          @map("SenhaHash")
+  dataCadastro      DateTime        @default(now()) @map("DataCadastro") @db.Date
   cursosMinistrados Curso[]         @relation("InstrutorCursos")
   matriculas        Matricula[]
   progressoAulas    ProgressoAula[]
