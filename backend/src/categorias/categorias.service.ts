@@ -16,17 +16,17 @@ export class CategoriasService {
   }
 
   findOne(id: number) {
-    return this.prisma.categoria.findUnique({ where: { id } });
+    return this.prisma.categoria.findUnique({ where: { idCategoria: id } });
   }
 
   update(id: number, updateCategoriaDto: UpdateCategoriaDto) {
     return this.prisma.categoria.update({
-      where: { id },
+      where: { idCategoria: id },
       data: updateCategoriaDto,
     });
   }
 
   remove(id: number) {
-    return this.prisma.categoria.delete({ where: { id } });
+    return this.prisma.categoria.delete({ where: { idCategoria: id } });
   }
 }

@@ -6,12 +6,10 @@ import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 
 // A senha nunca sai da API: escolhemos explicitamente os campos retornados.
 const camposPublicos = {
-  id: true,
+  idUsuario: true,
   nomeCompleto: true,
   email: true,
   dataCadastro: true,
-  createdAt: true,
-  updatedAt: true,
 };
 
 @Injectable()
@@ -33,7 +31,7 @@ export class UsuariosService {
 
   findOne(id: number) {
     return this.prisma.usuario.findUnique({
-      where: { id },
+      where: { idUsuario: id },
       select: camposPublicos,
     });
   }
@@ -42,7 +40,7 @@ export class UsuariosService {
     const { senha, ...resto } = updateUsuarioDto;
 
     return this.prisma.usuario.update({
-      where: { id },
+      where: { idUsuario: id },
       // A senha só é reprocessada se vier no corpo da requisição.
       data: { ...resto, ...(senha && { senhaHash: await bcrypt.hash(senha, 10) }) },
       select: camposPublicos,
@@ -50,6 +48,6 @@ export class UsuariosService {
   }
 
   remove(id: number) {
-    return this.prisma.usuario.delete({ where: { id }, select: camposPublicos });
+    return this.prisma.usuario.delete({ where: { idUsuario: id }, select: camposPublicos });
   }
 }
