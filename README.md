@@ -207,12 +207,46 @@ Antes de dar push, se errar a mensagem: `git commit --amend -m "nova mensagem"`
 Documentação interativa em http://localhost:3000/api — clique na rota,
 **Try it out**, preencha e **Execute**.
 
-| Rota | Métodos |
-|---|---|
-| `/usuarios` | GET, POST, GET/:id, PATCH/:id, DELETE/:id |
-| `/categorias` | GET, POST, GET/:id, PATCH/:id, DELETE/:id |
+Todas seguem o mesmo padrão: `GET`, `POST`, `GET/:id`, `PATCH/:id`, `DELETE/:id`.
 
-As outras 12 tabelas já existem no banco, mas ainda não têm rotas.
+| Rota | Tabela |
+|---|---|
+| `/usuarios` | Usuarios |
+| `/categorias` | Categorias |
+| `/cursos` | Cursos |
+| `/modulos` | Modulos |
+| `/aulas` | Aulas |
+| `/matriculas` | Matriculas |
+| `/avaliacoes` | Avaliacoes |
+| `/trilhas` | Trilhas |
+| `/certificados` | Certificados |
+
+Duas tabelas têm **chave primária composta** — não têm um `id` só, então a rota
+leva os dois ids em vez de um:
+
+| Rota | Chave |
+|---|---|
+| `/progresso-aulas/:idUsuario/:idAula` | `@@id([idUsuario, idAula])` |
+| `/trilhas-cursos/:idTrilha/:idCurso` | `@@id([idTrilha, idCurso])` |
+
+No service, o Prisma junta os dois campos em um filtro só:
+
+```ts
+where: { idUsuario_idAula: { idUsuario, idAula } }
+```
+
+**Ainda sem rotas:** `Planos`, `Assinaturas` e `Pagamentos`. As tabelas já
+existem no banco — falta gerar o CRUD seguindo o passo a passo acima.
+
+### Datas
+
+As colunas de data guardam só o dia (`@db.Date`), e o JSON manda texto. Nos DTOs
+elas são validadas com `@IsDateString()` no formato `AAAA-MM-DD`, e o service
+converte para `Date` antes de entregar ao Prisma:
+
+```ts
+dataPublicacao: dataPublicacao ? new Date(dataPublicacao) : undefined,
+```
 
 ---
 
