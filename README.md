@@ -303,6 +303,26 @@ motivo de o token expirar em 1h, já que não há como cancelar um já emitido.
 > ⚠️ A `JWT_SECRET` assina tudo: quem tiver ela forja token de qualquer usuário.
 > O `.env` está no `.gitignore` e deve continuar assim.
 
+### A senha não volta nas respostas
+
+Nenhuma rota devolve o campo `senha`, nem em forma de hash. Isso é configurado
+uma vez só, no `prisma.service.ts`:
+
+```ts
+omit: { usuario: { senha: true } }   // vale para TODA consulta a Usuario
+```
+
+O único lugar que precisa do hash é o login, e ele pede de volta
+explicitamente, no `findByEmail`:
+
+```ts
+omit: { senha: false }
+```
+
+Foi feito assim — escondido por padrão, liberado sob demanda — para que uma rota
+nova criada no futuro não volte a vazar a senha por esquecimento. Quando o
+frontend entrar, o hash nunca chega ao navegador.
+
 ---
 
 ## Problemas comuns

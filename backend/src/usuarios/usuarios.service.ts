@@ -24,9 +24,13 @@ export class UsuariosService {
     return this.prisma.usuario.findUnique({ where: { idUsuario: id } });
   }
 
-  // Usado pelo AuthService durante o login.
+  // Usado pelo AuthService durante o login. É o único lugar que precisa do
+  // hash, então é o único que desfaz o omit configurado no PrismaService.
   findByEmail(email: string) {
-    return this.prisma.usuario.findUnique({ where: { email } });
+    return this.prisma.usuario.findUnique({
+      where: { email },
+      omit: { senha: false },
+    });
   }
 
   async update(id: number, updateUsuarioDto: UpdateUsuarioDto) {
