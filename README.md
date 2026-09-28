@@ -27,6 +27,7 @@ cd ~/TCS/plataformaCursos/backend
 ```bash
 npm install                   # baixa as dependências
 cp .env.example .env          # cria o arquivo de configuração
+# abra o .env e gere a sua JWT_SECRET (o comando está lá dentro)
 docker compose up -d          # sobe o PostgreSQL
 npx prisma migrate dev        # cria todas as tabelas
 npx prisma generate           # gera o cliente do Prisma
@@ -261,6 +262,49 @@ então `10.999` ou `-5` são recusados com 400.
 
 ---
 
+## Autenticação (JWT)
+
+A rota de cadastro é pública; o resto de `/usuarios` exige um token.
+As outras 11 rotas continuam abertas.
+
+| Rota | Precisa de token? |
+|---|---|
+| `POST /auth/login` | não — é onde o token nasce |
+| `POST /usuarios` | não — senão ninguém se cadastraria |
+| `GET/PATCH/DELETE /usuarios` | **sim** |
+| as outras 11 rotas | não |
+
+### Como testar no Swagger
+
+1. `POST /usuarios` — cadastre alguém (a senha vira hash automaticamente).
+2. `POST /auth/login` — mande `email` e `senha`, copie o `access_token`.
+3. Clique em **Authorize** (botão verde no topo), cole o token e confirme.
+4. `GET /usuarios` — agora responde 200. Sem o token, responde **401**.
+
+Usuários que já existem no banco: `joao@email.com` / `senha123` e
+`maria@email.com` / `senha456`.
+
+### Como funciona
+
+A senha nunca é salva como foi digitada. O `bcrypt` gera um **hash**, que é uma
+transformação de mão única — não existe "descriptografar". No login, a senha
+digitada passa pela mesma transformação e os dois hashes são comparados.
+
+O token é um **JWT**: três partes separadas por ponto (`cabeçalho.dados.assinatura`).
+Ele é **assinado, não criptografado** — qualquer um lê o conteúdo, cole um em
+jwt.io e veja. O que a assinatura garante é que ninguém alterou: trocar o `sub`
+para virar outro usuário invalida o token. Por isso **nunca se coloca senha no
+payload**.
+
+O servidor não guarda uma lista de tokens válidos, só confere a assinatura com a
+`JWT_SECRET` do `.env`. É isso que torna o sistema *stateless* — e também o
+motivo de o token expirar em 1h, já que não há como cancelar um já emitido.
+
+> ⚠️ A `JWT_SECRET` assina tudo: quem tiver ela forja token de qualquer usuário.
+> O `.env` está no `.gitignore` e deve continuar assim.
+
+---
+
 ## Problemas comuns
 
 **`EADDRINUSE: address already in use :::3000`**
@@ -280,6 +324,14 @@ O banco não está no ar: `docker compose up -d`
 **A API cai sozinha enquanto está rodando**
 Não rode `npm run build` com o `npm run start:dev` aberto — o build apaga a
 pasta `dist` embaixo do watch. Use um ou outro.
+
+**`401 Unauthorized` numa rota de `/usuarios`**
+Faltou o token, ou ele expirou (dura 1h). Refaça o `POST /auth/login` e clique
+em **Authorize** de novo com o token novo.
+
+**`JWT_SECRET não definida`**
+A aplicação não sobe sem a chave. Confira se a linha `JWT_SECRET=` existe no
+`.env` — o `.env.example` traz o comando para gerar uma.
 
 **`Missing script: start:dev`**
 Você está na pasta errada. Precisa estar em `backend`.

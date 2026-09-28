@@ -14,6 +14,12 @@ async function bootstrap() {
     .setTitle('Plataforma de Cursos Online')
     .setDescription('API da plataforma de cursos com NestJS e Prisma')
     .setVersion('1.0')
+    .addTag('auth')
+    .addBearerAuth(
+      // Faz aparecer o botão "Authorize" no topo da página do Swagger.
+      { type: 'http', scheme: 'bearer', bearerFormat: 'JWT', in: 'header' },
+      'token', // precisa bater com o nome usado em @ApiBearerAuth('token')
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
