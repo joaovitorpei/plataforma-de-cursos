@@ -220,6 +220,9 @@ Todas seguem o mesmo padrão: `GET`, `POST`, `GET/:id`, `PATCH/:id`, `DELETE/:id
 | `/avaliacoes` | Avaliacoes |
 | `/trilhas` | Trilhas |
 | `/certificados` | Certificados |
+| `/planos` | Planos |
+| `/assinaturas` | Assinaturas |
+| `/pagamentos` | Pagamentos |
 
 Duas tabelas têm **chave primária composta** — não têm um `id` só, então a rota
 leva os dois ids em vez de um:
@@ -235,8 +238,7 @@ No service, o Prisma junta os dois campos em um filtro só:
 where: { idUsuario_idAula: { idUsuario, idAula } }
 ```
 
-**Ainda sem rotas:** `Planos`, `Assinaturas` e `Pagamentos`. As tabelas já
-existem no banco — falta gerar o CRUD seguindo o passo a passo acima.
+As **14 tabelas** do banco têm CRUD completo.
 
 ### Datas
 
@@ -247,6 +249,15 @@ converte para `Date` antes de entregar ao Prisma:
 ```ts
 dataPublicacao: dataPublicacao ? new Date(dataPublicacao) : undefined,
 ```
+
+### Dinheiro
+
+`preco` (Planos) e `valorPago` (Pagamentos) são `Decimal` no Prisma. Você manda
+número no JSON (`299.90`), mas **a resposta volta como texto** (`"299.9"`) — é
+assim que o Prisma serializa Decimal, para não perder precisão em centavos.
+
+Nos DTOs eles são validados com `@IsNumber({ maxDecimalPlaces: 2 })` e `@Min(0)`,
+então `10.999` ou `-5` são recusados com 400.
 
 ---
 

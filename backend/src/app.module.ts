@@ -13,6 +13,9 @@ import { ProgressoAulasModule } from './progresso-aulas/progresso-aulas.module';
 import { TrilhasModule } from './trilhas/trilhas.module';
 import { TrilhasCursosModule } from './trilhas-cursos/trilhas-cursos.module';
 import { CertificadosModule } from './certificados/certificados.module';
+import { PlanosModule } from './planos/planos.module';
+import { AssinaturasModule } from './assinaturas/assinaturas.module';
+import { PagamentosModule } from './pagamentos/pagamentos.module';
 
 @Module({
   imports: [
@@ -28,6 +31,9 @@ import { CertificadosModule } from './certificados/certificados.module';
     TrilhasModule,
     TrilhasCursosModule,
     CertificadosModule,
+    PlanosModule,
+    AssinaturasModule,
+    PagamentosModule,
   ],
   controllers: [AppController],
   providers: [AppService],
