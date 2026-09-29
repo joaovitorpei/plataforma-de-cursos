@@ -74,12 +74,7 @@ export function Pagamentos() {
         titulo="Pagamentos"
         descricao="Os valores recebidos por cada assinatura."
         acao={
-          <>
-            <Botao variante="secundario" onClick={() => void recarregar()} disabled={carregando}>
-              ↻ Atualizar
-            </Botao>
-            <Link to="/pagamentos/novo"><Botao>Registrar pagamento</Botao></Link>
-          </>
+          <Link to="/pagamentos/novo"><Botao>Registrar pagamento</Botao></Link>
         }
       />
 

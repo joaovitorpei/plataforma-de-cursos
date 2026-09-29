@@ -31,12 +31,7 @@ export function Trilhas() {
         titulo="Trilhas"
         descricao="Sequências de cursos que levam a um objetivo."
         acao={
-          <>
-            <Botao variante="secundario" onClick={() => void recarregar()} disabled={carregando}>
-              ↻ Atualizar
-            </Botao>
-            <Link to="/trilhas/nova"><Botao>Nova trilha</Botao></Link>
-          </>
+          <Link to="/trilhas/nova"><Botao>Nova trilha</Botao></Link>
         }
       />
 

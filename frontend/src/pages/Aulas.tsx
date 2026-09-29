@@ -64,12 +64,7 @@ export function Aulas() {
         titulo="Aulas"
         descricao="O conteúdo que o aluno assiste, dentro de cada módulo."
         acao={
-          <>
-            <Botao variante="secundario" onClick={() => void recarregar()} disabled={carregando}>
-              ↻ Atualizar
-            </Botao>
-            <Link to="/aulas/nova"><Botao>Nova aula</Botao></Link>
-          </>
+          <Link to="/aulas/nova"><Botao>Nova aula</Botao></Link>
         }
       />
 

@@ -66,12 +66,7 @@ export function Usuarios() {
         titulo="Usuários"
         descricao="Alunos e instrutores. A senha fica guardada com hash e nunca volta da API."
         acao={
-          <>
-            <Botao variante="secundario" onClick={() => void recarregar()} disabled={carregando}>
-              ↻ Atualizar
-            </Botao>
-            <Link to="/usuarios/novo"><Botao>Novo usuário</Botao></Link>
-          </>
+          <Link to="/usuarios/novo"><Botao>Novo usuário</Botao></Link>
         }
       />
 

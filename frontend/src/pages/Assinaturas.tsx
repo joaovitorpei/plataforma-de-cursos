@@ -84,12 +84,7 @@ export function Assinaturas() {
         titulo="Assinaturas"
         descricao="Quem contratou qual plano e por quanto tempo."
         acao={
-          <>
-            <Botao variante="secundario" onClick={() => void recarregar()} disabled={carregando}>
-              ↻ Atualizar
-            </Botao>
-            <Link to="/assinaturas/nova"><Botao>Nova assinatura</Botao></Link>
-          </>
+          <Link to="/assinaturas/nova"><Botao>Nova assinatura</Botao></Link>
         }
       />
 

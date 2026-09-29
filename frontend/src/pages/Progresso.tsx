@@ -79,12 +79,7 @@ export function Progresso() {
         titulo="Progresso nas aulas"
         descricao="Tabela de chave composta: cada registro é identificado pelo par aluno + aula."
         acao={
-          <>
-            <Botao variante="secundario" onClick={() => void recarregar()} disabled={carregando}>
-              ↻ Atualizar
-            </Botao>
-            <Link to="/progresso/novo"><Botao>Registrar progresso</Botao></Link>
-          </>
+          <Link to="/progresso/novo"><Botao>Registrar progresso</Botao></Link>
         }
       />
 

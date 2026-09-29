@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 
 import { useAuth } from '../auth/useAuth';
 import { useCarregamento } from '../hooks/useCarregamento';
-import { Alerta, Botao, Carregando, Cartao, Selo } from '../components/ui';
+import { Alerta, Carregando, Cartao, Selo } from '../components/ui';
 import {
   assinaturaService,
   avaliacaoService,
@@ -34,7 +34,7 @@ async function carregarPainel() {
 
 export function Inicio() {
   const { usuario } = useAuth();
-  const { dados, erro, carregando, recarregar } = useCarregamento(carregarPainel);
+  const { dados, erro, carregando } = useCarregamento(carregarPainel);
 
   const primeiroNome = usuario?.nomeCompleto.split(' ')[0] ?? '';
 
@@ -46,11 +46,6 @@ export function Inicio() {
           Seus cursos, trilhas e certificados em um só lugar. Acompanhe o
           catálogo da plataforma e o andamento de cada aluno.
         </p>
-        <div style={{ marginTop: 'var(--e-5)' }}>
-          <Botao variante="secundario" onClick={() => void recarregar()} disabled={carregando}>
-            {carregando ? 'Atualizando…' : '↻ Atualizar'}
-          </Botao>
-        </div>
       </section>
 
       {erro ? <Alerta tipo="erro">{erro}</Alerta> : null}

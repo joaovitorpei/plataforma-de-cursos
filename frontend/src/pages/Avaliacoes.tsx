@@ -75,12 +75,7 @@ export function Avaliacoes() {
         titulo="Avaliações"
         descricao="Notas de 1 a 5 dadas pelos alunos aos cursos."
         acao={
-          <>
-            <Botao variante="secundario" onClick={() => void recarregar()} disabled={carregando}>
-              ↻ Atualizar
-            </Botao>
-            <Link to="/avaliacoes/nova"><Botao>Nova avaliação</Botao></Link>
-          </>
+          <Link to="/avaliacoes/nova"><Botao>Nova avaliação</Botao></Link>
         }
       />
 

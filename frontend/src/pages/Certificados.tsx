@@ -75,12 +75,7 @@ export function Certificados() {
         titulo="Certificados"
         descricao="Emitidos na conclusão de um curso ou de uma trilha."
         acao={
-          <>
-            <Botao variante="secundario" onClick={() => void recarregar()} disabled={carregando}>
-              ↻ Atualizar
-            </Botao>
-            <Link to="/certificados/novo"><Botao>Emitir certificado</Botao></Link>
-          </>
+          <Link to="/certificados/novo"><Botao>Emitir certificado</Botao></Link>
         }
       />
 

@@ -185,9 +185,7 @@ cd ~/TCS/plataformaCursos/backend && npx prisma studio --port 5555
 ```
 
 - [ ] No Prisma Studio, abra a tabela **Categorias**
-- [ ] Clique no botão de adicionar linha — dependendo da versão do Prisma Studio
-      ele se chama **Insert row** ou **Add record** → Nome: `Redes` →
-      Descricao: `Infraestrutura e protocolos.`
+- [ ] **Add record** → Nome: `Redes` → Descricao: `Infraestrutura e protocolos.`
 - [ ] **Save 1 change**
 - [ ] Volte na aba do EduCursos, em **Catálogo → Categorias**
 - [ ] Clique em **↻ Atualizar** → a categoria `Redes` tem que aparecer
@@ -240,6 +238,72 @@ Repita com algo mais visível:
 
 ---
 
+## Roteiro E — Pelo Swagger
+
+O mesmo teste do Roteiro B, mas entrando pela **API** em vez do Prisma Studio.
+É o caminho mais provável de o professor usar.
+
+Abra **http://localhost:3000/api**
+
+### E1. A pegadinha do 401
+
+Antes de autorizar, veja o que acontece numa rota protegida:
+
+- [ ] Abra `GET /usuarios` → **Try it out** → **Execute**
+- [ ] Deve responder **401 Unauthorized**
+
+Isso está **certo**, não é defeito: `/usuarios` exige token. As outras 11 rotas
+(cursos, categorias, módulos, aulas, matrículas, avaliações, progresso, trilhas,
+certificados, planos, assinaturas, pagamentos) respondem sem token nenhum.
+
+### E2. Pegar o token
+
+- [ ] Abra `POST /auth/login` → **Try it out**
+- [ ] No corpo, troque pelos seus dados:
+
+  ```json
+  { "email": "rita@educursos.com", "senha": "senha123" }
+  ```
+
+- [ ] **Execute** → copie o valor de `access_token` da resposta
+      (só o texto entre aspas, sem as aspas)
+
+### E3. Autorizar
+
+- [ ] Clique no botão **Authorize** 🔓 no topo da página
+- [ ] Cole o token no campo → **Authorize** → **Close**
+- [ ] Repita o `GET /usuarios` → agora deve responder **200** com a lista
+
+> O Swagger já manda o `Bearer` na frente do token — cole só o token puro.
+
+### E4. Criar pela API e ver na tela
+
+- [ ] Em `POST /categorias` → **Try it out** → corpo:
+
+  ```json
+  { "nome": "Redes", "descricao": "Infraestrutura e protocolos." }
+  ```
+
+- [ ] **Execute** → deve responder **201** com o `idCategoria` novo
+- [ ] Vá para o EduCursos em **Catálogo → Categorias** e aperte **F5**
+- [ ] A categoria `Redes` tem que aparecer na tabela
+
+### E5. Os erros aparecem certinho
+
+- [ ] `POST /categorias` de novo com o **mesmo nome** `Redes`
+      → deve dar **409 Conflict**: "Já existe um registro com este valor em: nome"
+- [ ] `POST /avaliacoes` com `"nota": 9`
+      → deve dar **400**: "nota must not be greater than 5"
+- [ ] `POST /modulos` com `"idCurso": 999999`
+      → deve dar **400**: "Referência inválida em: Modulos_ID_Curso_fkey"
+- [ ] `DELETE /planos/999999`
+      → deve dar **404**: "Registro não encontrado"
+
+Esses quatro mostram o tratamento de erro do Prisma funcionando — é o
+`PrismaExceptionFilter` traduzindo os códigos do banco para HTTP.
+
+---
+
 ## O que me mandar depois
 
 Copie e preencha:
@@ -249,6 +313,7 @@ ROTEIRO A: passou / parou no passo ___
 ROTEIRO B: passou / parou no passo ___
 ROTEIRO C: passou / parou no passo ___
 ROTEIRO D: passou / parou no passo ___
+ROTEIRO E: passou / parou no passo ___
 
 Erros no console (F12 → Console), se houver:
 

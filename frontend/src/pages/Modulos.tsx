@@ -65,12 +65,7 @@ export function Modulos() {
         titulo="Módulos"
         descricao="Blocos que organizam as aulas dentro de um curso."
         acao={
-          <>
-            <Botao variante="secundario" onClick={() => void recarregar()} disabled={carregando}>
-              ↻ Atualizar
-            </Botao>
-            <Link to="/modulos/novo"><Botao>Novo módulo</Botao></Link>
-          </>
+          <Link to="/modulos/novo"><Botao>Novo módulo</Botao></Link>
         }
       />
 

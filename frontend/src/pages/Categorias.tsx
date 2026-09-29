@@ -52,14 +52,9 @@ export function Categorias() {
         titulo="Categorias"
         descricao="Agrupam os cursos e as trilhas da plataforma."
         acao={
-          <>
-            <Botao variante="secundario" onClick={() => void recarregar()} disabled={carregando}>
-              ↻ Atualizar
-            </Botao>
-            <Link to="/categorias/nova">
-              <Botao>Nova categoria</Botao>
-            </Link>
-          </>
+          <Link to="/categorias/nova">
+            <Botao>Nova categoria</Botao>
+          </Link>
         }
       />
 

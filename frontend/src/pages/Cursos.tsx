@@ -53,12 +53,7 @@ export function Cursos() {
         titulo="Cursos"
         descricao="O catálogo da plataforma."
         acao={
-          <>
-            <Botao variante="secundario" onClick={() => void recarregar()} disabled={carregando}>
-              ↻ Atualizar
-            </Botao>
-            <Link to="/cursos/novo"><Botao>Novo curso</Botao></Link>
-          </>
+          <Link to="/cursos/novo"><Botao>Novo curso</Botao></Link>
         }
       />
 

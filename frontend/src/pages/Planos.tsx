@@ -25,12 +25,7 @@ export function Planos() {
         titulo="Planos"
         descricao="Assinaturas de acesso à plataforma."
         acao={
-          <>
-            <Botao variante="secundario" onClick={() => void recarregar()} disabled={carregando}>
-              ↻ Atualizar
-            </Botao>
-            <Link to="/planos/novo"><Botao>Novo plano</Botao></Link>
-          </>
+          <Link to="/planos/novo"><Botao>Novo plano</Botao></Link>
         }
       />
 

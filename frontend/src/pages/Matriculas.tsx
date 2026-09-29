@@ -78,12 +78,7 @@ export function Matriculas() {
         titulo="Matrículas"
         descricao="Quem está inscrito em qual curso. A data de matrícula é preenchida pelo banco."
         acao={
-          <>
-            <Botao variante="secundario" onClick={() => void recarregar()} disabled={carregando}>
-              ↻ Atualizar
-            </Botao>
-            <Link to="/matriculas/nova"><Botao>Nova matrícula</Botao></Link>
-          </>
+          <Link to="/matriculas/nova"><Botao>Nova matrícula</Botao></Link>
         }
       />
 
