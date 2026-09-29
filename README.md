@@ -1,17 +1,21 @@
 # Plataforma de Cursos Online
 
-Backend da plataforma de cursos (LAB03), feito com **NestJS + Prisma + PostgreSQL**.
+Plataforma de cursos (LAB03): API em **NestJS + Prisma + PostgreSQL** e interface
+**EduCursos** em React.
 
 ```
 plataformaCursos/
-└── backend/     API NestJS, Prisma e o PostgreSQL em Docker
+├── backend/     API NestJS, Prisma e o PostgreSQL em Docker
+└── frontend/    EduCursos: a tela, em React + TypeScript + Vite
 ```
 
-Quase todos os comandos deste guia rodam dentro da pasta `backend`:
+A maior parte dos comandos deste guia roda dentro da pasta `backend`:
 
 ```bash
 cd ~/TCS/plataformaCursos/backend
 ```
+
+O frontend tem guia próprio em [`frontend/README.md`](frontend/README.md).
 
 ---
 
@@ -45,10 +49,17 @@ docker compose up -d
 
 Depois, cada comando abaixo ocupa um terminal. Deixe aberto.
 
-| Comando | Abre em | O que é |
-|---|---|---|
-| `npm run start:dev` | http://localhost:3000/api | API + Swagger |
-| `npx prisma studio --port 5555` | http://localhost:5555 | visualizador do banco |
+| Onde | Comando | Abre em | O que é |
+|---|---|---|---|
+| `backend` | `npm run start:dev` | http://localhost:3000/api | API + Swagger |
+| `frontend` | `npm run dev` | http://localhost:5173 | a tela (EduCursos) |
+| `backend` | `npx prisma studio --port 5555` | http://localhost:5555 | visualizador do banco |
+
+Para popular a plataforma com dados de demonstração, com a API no ar:
+
+```bash
+cd backend && npm run dados-exemplo   # entre com admin@educursos.com / senha123
+```
 
 `Ctrl+C` derruba o que estiver naquele terminal.
 
@@ -360,4 +371,7 @@ Você está na pasta errada. Precisa estar em `backend`.
 
 ## Tecnologias
 
-NestJS 11 · Prisma 7 · PostgreSQL 16 (Docker) · class-validator · Swagger
+**Backend:** NestJS 11 · Prisma 7 · PostgreSQL 16 (Docker) · class-validator ·
+Swagger · JWT (Passport) · bcrypt
+
+**Frontend:** React 19 · TypeScript · Vite · React Router · zod

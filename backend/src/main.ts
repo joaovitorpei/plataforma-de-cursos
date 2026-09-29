@@ -7,6 +7,12 @@ import { PrismaExceptionFilter } from './prisma/prisma-exception.filter';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // O frontend roda em outra porta (Vite: 5173). Sem isto o navegador bloqueia
+  // as chamadas por CORS — o curl e o Swagger funcionam, a tela não.
+  app.enableCors({
+    origin: process.env.FRONTEND_URL ?? 'http://localhost:5173',
+  });
+
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalFilters(new PrismaExceptionFilter());
 

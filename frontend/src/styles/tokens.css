@@ -1,0 +1,67 @@
+/* ============================================================
+   EduCursos — tokens de design
+   Paleta editorial: papel quente, tinta grafite, verde-petróleo
+   ============================================================ */
+
+:root {
+  /* ---- cor ---- */
+  --papel: #faf8f4;
+  --superficie: #ffffff;
+  --superficie-2: #f4f1ea;
+
+  --tinta: #1c2b30;
+  --tinta-2: #4a5c62;
+  --tinta-3: #7b8a8f;
+
+  --marca: #0f5f5c;
+  --marca-forte: #0a4543;
+  --marca-clara: #e3f0ee;
+
+  --destaque: #b4531a;
+  --destaque-claro: #fbeee4;
+
+  --borda: #e2ddd1;
+  --borda-forte: #cfc8b7;
+
+  --ok: #1d6b45;
+  --ok-claro: #e4f2ea;
+  --erro: #9b2c2c;
+  --erro-claro: #fbeaea;
+  --aviso: #8a6410;
+  --aviso-claro: #fbf2dc;
+
+  /* ---- tipografia ---- */
+  --fonte-titulo: 'Fraunces', 'Iowan Old Style', Georgia, serif;
+  --fonte-texto: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --fonte-mono: 'JetBrains Mono', 'SF Mono', Menlo, monospace;
+
+  --t-xs: 0.75rem;
+  --t-sm: 0.8125rem;
+  --t-base: 0.9375rem;
+  --t-md: 1.0625rem;
+  --t-lg: 1.375rem;
+  --t-xl: 1.875rem;
+  --t-2xl: 2.5rem;
+
+  /* ---- espaço ---- */
+  --e-1: 0.25rem;
+  --e-2: 0.5rem;
+  --e-3: 0.75rem;
+  --e-4: 1rem;
+  --e-5: 1.5rem;
+  --e-6: 2rem;
+  --e-7: 3rem;
+  --e-8: 4rem;
+
+  /* ---- forma ---- */
+  --raio: 10px;
+  --raio-sm: 6px;
+  --raio-lg: 16px;
+
+  --sombra-sm: 0 1px 2px rgba(28, 43, 48, 0.06);
+  --sombra: 0 2px 8px rgba(28, 43, 48, 0.07), 0 1px 2px rgba(28, 43, 48, 0.04);
+  --sombra-lg: 0 12px 32px rgba(28, 43, 48, 0.12);
+
+  --largura: 1140px;
+  --transicao: 140ms ease;
+}
