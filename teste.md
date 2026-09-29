@@ -185,7 +185,9 @@ cd ~/TCS/plataformaCursos/backend && npx prisma studio --port 5555
 ```
 
 - [ ] No Prisma Studio, abra a tabela **Categorias**
-- [ ] **Add record** → Nome: `Redes` → Descricao: `Infraestrutura e protocolos.`
+- [ ] Clique no botão de adicionar linha — dependendo da versão do Prisma Studio
+      ele se chama **Insert row** ou **Add record** → Nome: `Redes` →
+      Descricao: `Infraestrutura e protocolos.`
 - [ ] **Save 1 change**
 - [ ] Volte na aba do EduCursos, em **Catálogo → Categorias**
 - [ ] Clique em **↻ Atualizar** → a categoria `Redes` tem que aparecer
