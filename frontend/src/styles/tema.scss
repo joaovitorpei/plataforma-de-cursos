@@ -168,6 +168,17 @@ body { -webkit-font-smoothing: antialiased; }
 
   h1 { color: #fff; max-width: 20ch; }
   p  { color: #c5ded9; max-width: 52ch; }
+
+  // Sobre o fundo escuro o botão cinza some: aqui ele vira claro.
+  .btn-outline-secondary {
+    --bs-btn-color: #fff;
+    --bs-btn-border-color: rgba(255, 255, 255, 0.55);
+    --bs-btn-hover-bg: #fff;
+    --bs-btn-hover-color: #0a4543;
+    --bs-btn-hover-border-color: #fff;
+    --bs-btn-disabled-color: rgba(255, 255, 255, 0.65);
+    --bs-btn-disabled-border-color: rgba(255, 255, 255, 0.3);
+  }
 }
 
 // O indicador é um card que também é link: herda a cor e não sublinha.
