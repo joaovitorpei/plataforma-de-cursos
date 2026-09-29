@@ -42,49 +42,52 @@ export function Navbar() {
   }
 
   return (
-    <nav className={`navbar${aberta ? ' aberta' : ''}`}>
-      <div className="container navbar-interna">
-        <NavLink to="/" className="marca" onClick={() => setAberta(false)}>
-          Edu<span className="marca-destaque">Cursos</span>
+    <nav className="navbar navbar-expand-lg sticky-top">
+      <div className="container">
+        <NavLink to="/" className="navbar-brand marca" onClick={() => setAberta(false)}>
+          Edu<span>Cursos</span>
         </NavLink>
 
         <button
           type="button"
-          className="navbar-alternador"
+          className="navbar-toggler"
           aria-expanded={aberta}
           aria-label="Abrir menu"
           onClick={() => setAberta((valor) => !valor)}
         >
-          ☰
+          <span className="navbar-toggler-icon" />
         </button>
 
-        <div className="navegacao">
-          <NavLink
-            to="/"
-            end
-            className={({ isActive }) => `nav-link${isActive ? ' ativo' : ''}`}
-            onClick={() => setAberta(false)}
-          >
-            Início
-          </NavLink>
-          <MenuSuspenso titulo="Catálogo" itens={CATALOGO} />
-          <MenuSuspenso titulo="Conteúdo" itens={CONTEUDO} />
-          <MenuSuspenso titulo="Alunos" itens={ALUNOS} />
-          <MenuSuspenso titulo="Financeiro" itens={FINANCEIRO} />
-        </div>
+        <div className={`collapse navbar-collapse${aberta ? ' show' : ''}`}>
+          <ul className="navbar-nav me-auto mb-2 mb-lg-0">
+            <li className="nav-item">
+              <NavLink
+                to="/"
+                end
+                className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}
+                onClick={() => setAberta(false)}
+              >
+                Início
+              </NavLink>
+            </li>
+            <MenuSuspenso titulo="Catálogo" itens={CATALOGO} />
+            <MenuSuspenso titulo="Conteúdo" itens={CONTEUDO} />
+            <MenuSuspenso titulo="Alunos" itens={ALUNOS} />
+            <MenuSuspenso titulo="Financeiro" itens={FINANCEIRO} />
+          </ul>
 
-        <div className="usuario-bloco">
-          <span className="avatar" aria-hidden="true">
-            {iniciais(usuario?.nomeCompleto)}
-          </span>
-          <span className="texto-pequeno">
-            <strong>{usuario?.nomeCompleto ?? 'Visitante'}</strong>
-            <br />
-            <span className="texto-terciario">{usuario?.email}</span>
-          </span>
-          <Botao variante="secundario" tamanho="pequeno" onClick={aoSair}>
-            Sair
-          </Botao>
+          <div className="d-flex align-items-center gap-2 border-start ps-3">
+            <span className="avatar" aria-hidden="true">
+              {iniciais(usuario?.nomeCompleto)}
+            </span>
+            <span className="small lh-sm">
+              <strong className="d-block">{usuario?.nomeCompleto ?? 'Visitante'}</strong>
+              <span className="text-body-secondary">{usuario?.email}</span>
+            </span>
+            <Botao variante="secundario" tamanho="pequeno" onClick={aoSair}>
+              Sair
+            </Botao>
+          </div>
         </div>
       </div>
     </nav>

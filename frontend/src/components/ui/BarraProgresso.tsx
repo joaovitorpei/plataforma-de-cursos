@@ -11,20 +11,20 @@ export function BarraProgresso({
 
   return (
     <div>
-      <div className="linha-entre texto-pequeno texto-secundario" style={{ marginBottom: 4 }}>
+      <div className="d-flex justify-content-between small text-body-secondary mb-1">
         <span>{rotulo ?? 'Progresso'}</span>
         <span>
           {valor}/{total} · {porcentagem}%
         </span>
       </div>
       <div
-        className="progresso-trilho"
+        className="progress"
         role="progressbar"
         aria-valuenow={porcentagem}
         aria-valuemin={0}
         aria-valuemax={100}
       >
-        <div className="progresso-preenchimento" style={{ width: `${porcentagem}%` }} />
+        <div className="progress-bar" style={{ width: `${porcentagem}%` }} />
       </div>
     </div>
   );

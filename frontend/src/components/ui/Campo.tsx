@@ -8,29 +8,33 @@ interface Base {
   rotulo: string;
   erro?: string;
   ajuda?: string;
+  /** Classes de grade do Bootstrap, ex.: "col-md-6". */
+  className?: string;
 }
 
-/** <input> com rótulo, mensagem de erro e marcação de acessibilidade. */
+/** <input> com rótulo, erro e validação visual do Bootstrap. */
 export function CampoTexto({
   rotulo,
   erro,
   ajuda,
+  className = '',
   id,
   ...resto
-}: Base & InputHTMLAttributes<HTMLInputElement>) {
+}: Base & Omit<InputHTMLAttributes<HTMLInputElement>, 'className'>) {
   const identificador = id ?? resto.name;
   return (
-    <label className="campo" htmlFor={identificador}>
-      <span className="campo-rotulo">{rotulo}</span>
+    <div className={`mb-3 ${className}`}>
+      <label className="form-label" htmlFor={identificador}>
+        {rotulo}
+      </label>
       <input
         id={identificador}
-        className="campo-controle"
-        aria-invalid={erro ? 'true' : undefined}
+        className={`form-control${erro ? ' is-invalid' : ''}`}
         {...resto}
       />
-      {erro ? <span className="campo-erro">{erro}</span> : null}
-      {!erro && ajuda ? <span className="campo-ajuda">{ajuda}</span> : null}
-    </label>
+      {erro ? <div className="invalid-feedback">{erro}</div> : null}
+      {!erro && ajuda ? <div className="form-text">{ajuda}</div> : null}
+    </div>
   );
 }
 
@@ -46,21 +50,23 @@ export function CampoSelect({
   ajuda,
   opcoes,
   vazio = 'Selecione…',
+  className = '',
   id,
   ...resto
 }: Base &
-  SelectHTMLAttributes<HTMLSelectElement> & {
+  Omit<SelectHTMLAttributes<HTMLSelectElement>, 'className'> & {
     opcoes: Opcao[];
     vazio?: string;
   }) {
   const identificador = id ?? resto.name;
   return (
-    <label className="campo" htmlFor={identificador}>
-      <span className="campo-rotulo">{rotulo}</span>
+    <div className={`mb-3 ${className}`}>
+      <label className="form-label" htmlFor={identificador}>
+        {rotulo}
+      </label>
       <select
         id={identificador}
-        className="campo-controle"
-        aria-invalid={erro ? 'true' : undefined}
+        className={`form-select${erro ? ' is-invalid' : ''}`}
         {...resto}
       >
         <option value="">{vazio}</option>
@@ -70,9 +76,9 @@ export function CampoSelect({
           </option>
         ))}
       </select>
-      {erro ? <span className="campo-erro">{erro}</span> : null}
-      {!erro && ajuda ? <span className="campo-ajuda">{ajuda}</span> : null}
-    </label>
+      {erro ? <div className="invalid-feedback">{erro}</div> : null}
+      {!erro && ajuda ? <div className="form-text">{ajuda}</div> : null}
+    </div>
   );
 }
 
@@ -81,21 +87,23 @@ export function CampoArea({
   rotulo,
   erro,
   ajuda,
+  className = '',
   id,
   ...resto
-}: Base & TextareaHTMLAttributes<HTMLTextAreaElement>) {
+}: Base & Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, 'className'>) {
   const identificador = id ?? resto.name;
   return (
-    <label className="campo" htmlFor={identificador}>
-      <span className="campo-rotulo">{rotulo}</span>
+    <div className={`mb-3 ${className}`}>
+      <label className="form-label" htmlFor={identificador}>
+        {rotulo}
+      </label>
       <textarea
         id={identificador}
-        className="campo-controle"
-        aria-invalid={erro ? 'true' : undefined}
+        className={`form-control${erro ? ' is-invalid' : ''}`}
         {...resto}
       />
-      {erro ? <span className="campo-erro">{erro}</span> : null}
-      {!erro && ajuda ? <span className="campo-ajuda">{ajuda}</span> : null}
-    </label>
+      {erro ? <div className="invalid-feedback">{erro}</div> : null}
+      {!erro && ajuda ? <div className="form-text">{ajuda}</div> : null}
+    </div>
   );
 }

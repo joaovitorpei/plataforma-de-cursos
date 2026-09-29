@@ -8,7 +8,7 @@ export function Layout() {
   return (
     <div className="app">
       <Navbar />
-      <main className="conteudo">
+      <main className="flex-grow-1 py-4">
         <div className="container">
           <Outlet />
         </div>

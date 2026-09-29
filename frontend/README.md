@@ -1,6 +1,7 @@
 # EduCursos — Frontend
 
-Interface da Plataforma de Cursos Online, em **React + TypeScript + Vite**.
+Interface da Plataforma de Cursos Online, em **React + TypeScript + Vite**, com
+**Bootstrap 5** compilado a partir do Sass com um tema próprio.
 Consome a API NestJS que está em `../backend`.
 
 ---
@@ -57,9 +58,40 @@ src/
 │   └── layout/     navbar, rodapé, casca
 ├── pages/       34 telas
 ├── routes/      mapa de rotas
-├── styles/      tokens, base, componentes, layout
+├── styles/
+│   └── tema.scss   variáveis do Bootstrap + peças próprias
 └── utils/       formatação de data, moeda, duração
 ```
+
+---
+
+## O tema
+
+O Bootstrap **não** entra pronto: ele é compilado do Sass com as nossas
+variáveis definidas antes, em `src/styles/tema.scss`.
+
+```scss
+@import 'bootstrap/scss/functions';
+
+$primary:   #0f5f5c;   // verde-petróleo
+$body-bg:   #faf8f4;   // papel quente
+$headings-font-family: 'Fraunces', Georgia, serif;
+$border-radius: 0.625rem;
+
+@import 'bootstrap/scss/bootstrap';
+```
+
+Com isso `.btn-primary`, `.badge`, `.nav-link` e o resto já nascem na cor da
+plataforma — o CSS gerado traz `--bs-btn-bg: #0f5f5c`, não o azul padrão.
+
+Os componentes em `components/ui/` são nossos, construídos **sobre** as classes
+do Bootstrap: `Botao` monta `btn btn-primary`, `Tabela` monta
+`table table-hover` dentro de `table-responsive`, `Modal` monta a estrutura
+`modal / modal-dialog / modal-content` controlada por estado do React (sem
+carregar o JavaScript do Bootstrap), e `Cartao` monta `card` + `card-body`.
+
+As listagens em cartões usam o **grid system**: `row row-cols-1 row-cols-md-2
+row-cols-lg-3 g-3`.
 
 ---
 

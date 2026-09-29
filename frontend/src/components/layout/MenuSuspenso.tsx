@@ -6,10 +6,13 @@ export interface ItemMenu {
   texto: string;
 }
 
-/** Menu da navbar. Fecha no Esc, no clique fora e ao navegar. */
+/**
+ * Dropdown do Bootstrap controlado pelo React — sem carregar o JS do
+ * Bootstrap. Fecha no Esc, no clique fora e ao navegar.
+ */
 export function MenuSuspenso({ titulo, itens }: { titulo: string; itens: ItemMenu[] }) {
   const [aberto, setAberto] = useState(false);
-  const caixa = useRef<HTMLDivElement>(null);
+  const caixa = useRef<HTMLLIElement>(null);
   const identificador = useId();
 
   useEffect(() => {
@@ -31,31 +34,33 @@ export function MenuSuspenso({ titulo, itens }: { titulo: string; itens: ItemMen
   }, [aberto]);
 
   return (
-    <div className="menu" ref={caixa}>
+    <li className="nav-item dropdown" ref={caixa}>
       <button
         type="button"
-        className="nav-link"
+        className="nav-link dropdown-toggle"
+        id={identificador}
         aria-expanded={aberto}
-        aria-controls={identificador}
         onClick={() => setAberto((valor) => !valor)}
       >
-        {titulo} <span aria-hidden="true">▾</span>
+        {titulo}
       </button>
 
-      {aberto ? (
-        <div className="menu-painel" id={identificador}>
-          {itens.map((item) => (
+      <ul
+        className={`dropdown-menu${aberto ? ' show' : ''}`}
+        aria-labelledby={identificador}
+      >
+        {itens.map((item) => (
+          <li key={item.para}>
             <NavLink
-              key={item.para}
               to={item.para}
-              className={({ isActive }) => `menu-item${isActive ? ' ativo' : ''}`}
+              className={({ isActive }) => `dropdown-item${isActive ? ' active' : ''}`}
               onClick={() => setAberto(false)}
             >
               {item.texto}
             </NavLink>
-          ))}
-        </div>
-      ) : null}
-    </div>
+          </li>
+        ))}
+      </ul>
+    </li>
   );
 }

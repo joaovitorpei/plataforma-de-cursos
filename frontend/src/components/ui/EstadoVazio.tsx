@@ -11,9 +11,9 @@ export function EstadoVazio({
 }) {
   return (
     <div className="vazio">
-      <p className="vazio-titulo">{titulo}</p>
-      {descricao ? <p className="texto-secundario">{descricao}</p> : null}
-      {acao ? <div style={{ marginTop: 'var(--e-4)' }}>{acao}</div> : null}
+      <p className="h5 mb-1">{titulo}</p>
+      {descricao ? <p className="text-body-secondary mb-0">{descricao}</p> : null}
+      {acao ? <div className="mt-3">{acao}</div> : null}
     </div>
   );
 }

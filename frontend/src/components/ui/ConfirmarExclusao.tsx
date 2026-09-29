@@ -25,16 +25,14 @@ export function ConfirmarExclusao({
           <Botao variante="secundario" onClick={aoCancelar} disabled={ocupado}>
             Cancelar
           </Botao>
-          <Botao variante="perigo" onClick={aoConfirmar} disabled={ocupado}>
+          <button type="button" className="btn btn-danger" onClick={aoConfirmar} disabled={ocupado}>
             {ocupado ? 'Excluindo…' : 'Excluir'}
-          </Botao>
+          </button>
         </>
       }
     >
-      <p className="texto-secundario">{descricao}</p>
-      <p className="texto-terciario" style={{ marginTop: 'var(--e-2)' }}>
-        Esta ação não pode ser desfeita.
-      </p>
+      <p className="mb-1">{descricao}</p>
+      <p className="text-body-secondary small mb-0">Esta ação não pode ser desfeita.</p>
     </Modal>
   );
 }

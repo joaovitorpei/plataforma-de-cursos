@@ -46,7 +46,7 @@ export function Trilhas() {
       {carregando && !dados ? (
         <Carregando />
       ) : dados && dados.trilhas.length > 0 ? (
-        <div className="grade">
+        <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
           {dados.trilhas.map((trilha) => {
             const categoria = dados.categorias.find(
               (c) => c.idCategoria === trilha.idCategoria,
@@ -56,35 +56,38 @@ export function Trilhas() {
             ).length;
 
             return (
-              <Cartao key={trilha.idTrilha} interativo>
-                {categoria ? <Selo cor="marca">{categoria.nome}</Selo> : null}
-                <Link to={`/trilhas/${trilha.idTrilha}`} style={{ color: 'inherit' }}>
-                  <p className="cartao-titulo" style={{ marginTop: 'var(--e-2)' }}>
-                    {trilha.titulo}
-                  </p>
-                </Link>
-                <p className="texto-secundario texto-pequeno">
-                  {resumir(trilha.descricao, 100) || 'Sem descrição.'}
-                </p>
-                <p className="texto-terciario" style={{ marginTop: 'var(--e-3)' }}>
-                  {quantos} {quantos === 1 ? 'curso' : 'cursos'}
-                </p>
-                <div className="linha" style={{ marginTop: 'var(--e-4)' }}>
-                  <Link to={`/trilhas/${trilha.idTrilha}`}>
-                    <Botao variante="secundario" tamanho="pequeno">Ver</Botao>
-                  </Link>
-                  <Link to={`/trilhas/${trilha.idTrilha}/editar`}>
-                    <Botao variante="texto" tamanho="pequeno">Editar</Botao>
-                  </Link>
-                  <Botao
-                    variante="texto"
-                    tamanho="pequeno"
-                    onClick={() => exclusao.pedirConfirmacao(trilha)}
+              <div className="col" key={trilha.idTrilha}>
+                <Cartao interativo className="h-100">
+                  {categoria ? <Selo cor="marca">{categoria.nome}</Selo> : null}
+                  <Link
+                    to={`/trilhas/${trilha.idTrilha}`}
+                    className="text-decoration-none text-body"
                   >
-                    Excluir
-                  </Botao>
-                </div>
-              </Cartao>
+                    <p className="cartao-titulo mt-2">{trilha.titulo}</p>
+                  </Link>
+                  <p className="texto-secundario texto-pequeno">
+                    {resumir(trilha.descricao, 100) || 'Sem descrição.'}
+                  </p>
+                  <p className="texto-terciario mt-3">
+                    {quantos} {quantos === 1 ? 'curso' : 'cursos'}
+                  </p>
+                  <div className="linha mt-3">
+                    <Link to={`/trilhas/${trilha.idTrilha}`}>
+                      <Botao variante="secundario" tamanho="pequeno">Ver</Botao>
+                    </Link>
+                    <Link to={`/trilhas/${trilha.idTrilha}/editar`}>
+                      <Botao variante="texto" tamanho="pequeno">Editar</Botao>
+                    </Link>
+                    <Botao
+                      variante="texto"
+                      tamanho="pequeno"
+                      onClick={() => exclusao.pedirConfirmacao(trilha)}
+                    >
+                      Excluir
+                    </Botao>
+                  </div>
+                </Cartao>
+              </div>
             );
           })}
         </div>

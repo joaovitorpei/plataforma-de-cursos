@@ -1,0 +1,401 @@
+// ============================================================
+// EduCursos — tema próprio compilado a partir do Sass do Bootstrap
+//
+// As variáveis abaixo são definidas ANTES de carregar o Bootstrap, então
+// botões, cards, tabelas e o resto já nascem com a identidade da plataforma:
+// papel quente, tinta grafite e verde-petróleo.
+// ============================================================
+
+@import 'bootstrap/scss/functions';
+
+// ---------------- cor ----------------
+$primary:   #0f5f5c;
+$secondary: #5b6f75;
+$success:   #1d6b45;
+$danger:    #9b2c2c;
+$warning:   #8a6410;
+$info:      #2a6f8e;
+$light:     #f4f1ea;
+$dark:      #1c2b30;
+
+$body-bg:              #faf8f4;
+$body-color:           #1c2b30;
+$body-secondary-color: rgba(28, 43, 48, 0.68);
+$body-tertiary-color:  rgba(28, 43, 48, 0.5);
+$body-tertiary-bg:     #f4f1ea;
+
+$border-color: #e2ddd1;
+
+// ---------------- tipografia ----------------
+$font-family-sans-serif: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+$headings-font-family:   'Fraunces', 'Iowan Old Style', Georgia, serif;
+
+$font-size-base:     0.9375rem;
+$headings-font-weight: 600;
+$headings-line-height: 1.2;
+$h1-font-size: 2.25rem;
+$h2-font-size: 1.75rem;
+$h3-font-size: 1.375rem;
+$h4-font-size: 1.125rem;
+
+// ---------------- forma ----------------
+$border-radius:    0.625rem;
+$border-radius-sm: 0.375rem;
+$border-radius-lg: 1rem;
+
+$box-shadow-sm: 0 1px 2px rgba(28, 43, 48, 0.06);
+$box-shadow:    0 2px 8px rgba(28, 43, 48, 0.07), 0 1px 2px rgba(28, 43, 48, 0.04);
+$box-shadow-lg: 0 12px 32px rgba(28, 43, 48, 0.12);
+
+// ---------------- componentes ----------------
+$card-bg:            #fff;
+$card-border-color:  $border-color;
+$card-box-shadow:    $box-shadow-sm;
+$card-spacer-y:      1.25rem;
+$card-spacer-x:      1.25rem;
+
+$input-bg:              #fff;
+$input-border-color:    #cfc8b7;
+$input-focus-box-shadow: 0 0 0 0.2rem rgba(15, 95, 92, 0.15);
+
+$table-bg:          #fff;
+$table-hover-bg:    #f4f1ea;
+$table-border-color: $border-color;
+$table-cell-padding-y: 0.75rem;
+$table-cell-padding-x: 1rem;
+
+$navbar-light-color:        rgba(28, 43, 48, 0.68);
+$navbar-light-hover-color:  #1c2b30;
+$navbar-light-active-color: #0a4543;
+
+$dropdown-border-color: $border-color;
+$dropdown-box-shadow:   $box-shadow-lg;
+$dropdown-link-active-bg: #e3f0ee;
+$dropdown-link-active-color: #0a4543;
+
+$badge-font-weight: 500;
+$badge-padding-y:   0.3em;
+$badge-padding-x:   0.6em;
+
+$modal-content-border-color: $border-color;
+$modal-content-border-radius: $border-radius-lg;
+
+$progress-bg:     #f4f1ea;
+$progress-height: 0.5rem;
+
+$enable-shadows: false;
+$enable-negative-margins: true;
+
+@import 'bootstrap/scss/bootstrap';
+
+// ============================================================
+// Ajustes e peças próprias, por cima do Bootstrap
+// ============================================================
+
+// Títulos com a serifada; o Bootstrap não expõe isso por variável em todo lugar.
+h1, h2, h3, h4, h5, .titulo {
+  font-family: $headings-font-family;
+  letter-spacing: -0.015em;
+}
+
+body { -webkit-font-smoothing: antialiased; }
+
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+// ---------------- marca ----------------
+.marca {
+  font-family: $headings-font-family;
+  font-weight: 700;
+  font-size: 1.3rem;
+  letter-spacing: -0.03em;
+  color: $body-color;
+  text-decoration: none;
+
+  &:hover { color: $body-color; }
+
+  span { color: $primary; }
+}
+
+// ---------------- navbar ----------------
+.navbar {
+  background: #fff;
+  border-bottom: 1px solid $border-color;
+}
+
+.avatar {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: #e3f0ee;
+  color: #0a4543;
+  display: grid;
+  place-items: center;
+  font-weight: 600;
+  font-size: 0.8125rem;
+  flex-shrink: 0;
+}
+
+// ---------------- cartões ----------------
+.card-interativo {
+  transition: box-shadow 0.14s ease, transform 0.14s ease, border-color 0.14s ease;
+
+  &:hover {
+    box-shadow: $box-shadow;
+    border-color: #cfc8b7;
+    transform: translateY(-2px);
+  }
+}
+
+// ---------------- estado vazio ----------------
+.vazio {
+  border: 1px dashed #cfc8b7;
+  border-radius: $border-radius;
+  background: #fff;
+  text-align: center;
+  padding: 3rem 1.5rem;
+}
+
+// ---------------- painel inicial ----------------
+.heroi {
+  background: linear-gradient(135deg, #0a4543, $primary);
+  color: #fff;
+  border-radius: $border-radius-lg;
+  padding: 3rem 2rem;
+
+  h1 { color: #fff; max-width: 20ch; }
+  p  { color: #c5ded9; max-width: 52ch; }
+}
+
+// O indicador é um card que também é link: herda a cor e não sublinha.
+.indicador {
+  color: inherit;
+  text-decoration: none;
+
+  &:hover { color: inherit; }
+
+  .indicador-valor {
+    font-family: $headings-font-family;
+    font-size: 1.75rem;
+    font-weight: 600;
+    line-height: 1.1;
+  }
+}
+
+// ---------------- telas de acesso ----------------
+.acesso {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.acesso-vitrine {
+  background: #0a4543;
+  color: #fff;
+  padding: 4rem 3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  h2 { color: #fff; max-width: 22ch; }
+  p  { color: #c5ded9; max-width: 42ch; }
+
+  li { color: #d9ebe8; }
+
+  .acesso-marcador { color: #7fc4bb; font-weight: 700; }
+}
+
+.acesso-formulario {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 3rem 2rem;
+}
+
+.acesso-caixa { width: 100%; max-width: 380px; margin-inline: auto; }
+
+@media (max-width: 860px) {
+  .acesso { grid-template-columns: 1fr; }
+  .acesso-vitrine { padding: 2rem 1.5rem; }
+  .acesso-lista { display: none; }
+}
+
+// ---------------- estrelas ----------------
+.estrelas {
+  display: inline-flex;
+  gap: 1px;
+  color: #b4531a;
+  letter-spacing: 1px;
+  white-space: nowrap;
+
+  .vazia { color: #cfc8b7; }
+}
+
+// ---------------- certificado ----------------
+.certificado {
+  max-width: 860px;
+  margin-inline: auto;
+  background: #fff;
+  border: 2px solid $primary;
+  border-radius: $border-radius-lg;
+  padding: 4rem 3rem;
+  text-align: center;
+}
+
+.certificado-selo {
+  font-family: $headings-font-family;
+  font-weight: 700;
+  color: $primary;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 0.8125rem;
+}
+
+.certificado-nome {
+  font-family: $headings-font-family;
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #0a4543;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid $border-color;
+  display: inline-block;
+  min-width: min(100%, 26rem);
+}
+
+.letra-espacada { letter-spacing: 0.18em; }
+
+@media print {
+  .navbar, .rodape, .d-print-none { display: none !important; }
+  body { background: #fff; }
+  .certificado { border-width: 3px; max-width: 100%; }
+}
+
+// ============================================================
+// Utilitários de layout usados pelas telas
+//
+// São poucos e todos derivam da escala do Bootstrap ($spacer). Ficam aqui
+// porque se repetem em quase toda página e deixam o JSX mais curto.
+// ============================================================
+
+:root {
+  // espaçamento, na escala do $spacer do Bootstrap
+  --e-1: #{$spacer * 0.25};
+  --e-2: #{$spacer * 0.5};
+  --e-3: #{$spacer * 0.75};
+  --e-4: #{$spacer};
+  --e-5: #{$spacer * 1.5};
+  --e-6: #{$spacer * 2};
+  --e-7: #{$spacer * 3};
+  --e-8: #{$spacer * 4};
+
+  // tamanhos de texto
+  --t-sm:   0.8125rem;
+  --t-base: #{$font-size-base};
+  --t-md:   1.0625rem;
+  --t-lg:   #{$h3-font-size};
+  --t-xl:   #{$h2-font-size};
+  --t-2xl:  #{$h1-font-size};
+
+  --fonte-titulo: #{inspect($headings-font-family)};
+  --fonte-texto:  #{inspect($font-family-sans-serif)};
+
+  --marca: #{$primary};
+  --borda: #{$border-color};
+}
+
+// Empilha os blocos de uma página com respiro constante.
+.pilha   > * + * { margin-top: $spacer; }
+.pilha-g > * + * { margin-top: $spacer * 2; }
+
+.linha {
+  display: flex;
+  align-items: center;
+  gap: $spacer * 0.5;
+  flex-wrap: wrap;
+}
+
+.linha-entre {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacer;
+  flex-wrap: wrap;
+}
+
+// Grade de cartões — usa o mesmo gutter do grid do Bootstrap.
+.grade {
+  display: grid;
+  gap: $spacer;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+
+.indicadores {
+  display: grid;
+  gap: $spacer;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+.campos-lado-a-lado {
+  display: grid;
+  gap: 0 $spacer;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.texto-secundario { color: var(--bs-secondary-color); }
+.texto-terciario  { color: var(--bs-tertiary-color); font-size: 0.8125rem; }
+.texto-pequeno    { font-size: 0.8125rem; }
+.texto-centro     { text-align: center; }
+.mono             { font-family: var(--bs-font-monospace); font-size: 0.8125rem; }
+.largura-total    { width: 100%; }
+
+.cartao-titulo {
+  font-family: $headings-font-family;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  margin-bottom: $spacer * 0.5;
+}
+
+.indicador-rotulo {
+  font-size: 0.8125rem;
+  color: var(--bs-tertiary-color);
+  margin-top: $spacer * 0.25;
+}
+
+.acesso-lista {
+  list-style: none;
+  padding: 0;
+  margin-top: $spacer;
+  display: grid;
+  gap: $spacer * 0.75;
+
+  li { display: flex; gap: $spacer * 0.75; align-items: flex-start; }
+}
+
+.certificado-titulo {
+  font-size: 2.25rem;
+  margin: $spacer $spacer * 2;
+}
+
+.certificado-texto {
+  color: var(--bs-secondary-color);
+  margin-block: $spacer * 0.75;
+}
+
+.certificado-rodape {
+  display: flex;
+  justify-content: space-around;
+  gap: $spacer * 1.5;
+  flex-wrap: wrap;
+  margin-top: $spacer * 3;
+  padding-top: $spacer * 1.5;
+  border-top: 1px solid $border-color;
+  font-size: 0.8125rem;
+}
+
+// ---------------- acessibilidade ----------------
+@media (prefers-reduced-motion: reduce) {
+  .card-interativo:hover { transform: none; }
+}

@@ -86,43 +86,48 @@ export function Cursos() {
           ) : null}
 
           {cursosVisiveis.length > 0 ? (
-            <div className="grade">
+            <div className="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3">
               {cursosVisiveis.map((curso) => (
-                <Cartao key={curso.idCurso} interativo>
-                  <div className="linha" style={{ marginBottom: 'var(--e-2)' }}>
-                    <Selo cor="marca">{nomeCategoria(curso.idCategoria)}</Selo>
-                    {curso.nivel ? <Selo>{curso.nivel}</Selo> : null}
-                  </div>
+                <div className="col" key={curso.idCurso}>
+                  <Cartao interativo className="h-100">
+                    <div className="linha mb-2">
+                      <Selo cor="marca">{nomeCategoria(curso.idCategoria)}</Selo>
+                      {curso.nivel ? <Selo>{curso.nivel}</Selo> : null}
+                    </div>
 
-                  <Link to={`/cursos/${curso.idCurso}`} style={{ color: 'inherit' }}>
-                    <p className="cartao-titulo">{curso.titulo}</p>
-                  </Link>
-
-                  <p className="texto-secundario texto-pequeno">
-                    {resumir(curso.descricao, 100) || 'Sem descrição.'}
-                  </p>
-
-                  <p className="texto-terciario" style={{ marginTop: 'var(--e-3)' }}>
-                    {nomeInstrutor(curso.idInstrutor)} · {curso.totalAulas ?? 0} aulas ·{' '}
-                    {curso.totalHoras ?? 0}h · {data(curso.dataPublicacao)}
-                  </p>
-
-                  <div className="linha" style={{ marginTop: 'var(--e-4)' }}>
-                    <Link to={`/cursos/${curso.idCurso}`}>
-                      <Botao variante="secundario" tamanho="pequeno">Ver</Botao>
-                    </Link>
-                    <Link to={`/cursos/${curso.idCurso}/editar`}>
-                      <Botao variante="texto" tamanho="pequeno">Editar</Botao>
-                    </Link>
-                    <Botao
-                      variante="texto"
-                      tamanho="pequeno"
-                      onClick={() => exclusao.pedirConfirmacao(curso)}
+                    <Link
+                      to={`/cursos/${curso.idCurso}`}
+                      className="text-decoration-none text-body"
                     >
-                      Excluir
-                    </Botao>
-                  </div>
-                </Cartao>
+                      <p className="cartao-titulo">{curso.titulo}</p>
+                    </Link>
+
+                    <p className="texto-secundario texto-pequeno">
+                      {resumir(curso.descricao, 100) || 'Sem descrição.'}
+                    </p>
+
+                    <p className="texto-terciario mt-3 mb-0">
+                      {nomeInstrutor(curso.idInstrutor)} · {curso.totalAulas ?? 0} aulas ·{' '}
+                      {curso.totalHoras ?? 0}h · {data(curso.dataPublicacao)}
+                    </p>
+
+                    <div className="linha mt-3">
+                      <Link to={`/cursos/${curso.idCurso}`}>
+                        <Botao variante="secundario" tamanho="pequeno">Ver</Botao>
+                      </Link>
+                      <Link to={`/cursos/${curso.idCurso}/editar`}>
+                        <Botao variante="texto" tamanho="pequeno">Editar</Botao>
+                      </Link>
+                      <Botao
+                        variante="texto"
+                        tamanho="pequeno"
+                        onClick={() => exclusao.pedirConfirmacao(curso)}
+                      >
+                        Excluir
+                      </Botao>
+                    </div>
+                  </Cartao>
+                </div>
               ))}
             </div>
           ) : (

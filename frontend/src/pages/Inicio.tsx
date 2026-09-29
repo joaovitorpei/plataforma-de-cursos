@@ -59,7 +59,8 @@ export function Inicio() {
 
       {dados ? (
         <>
-          <section className="indicadores">
+          {/* Grid do Bootstrap: 2 colunas no celular, 4 no tablet, 8 no desktop */}
+          <section className="row row-cols-2 row-cols-md-4 g-3">
             {[
               { rotulo: 'Cursos', valor: dados.cursos.length, para: '/cursos' },
               { rotulo: 'Categorias', valor: dados.categorias.length, para: '/categorias' },
@@ -70,10 +71,14 @@ export function Inicio() {
               { rotulo: 'Planos', valor: dados.planos.length, para: '/planos' },
               { rotulo: 'Assinaturas', valor: dados.assinaturas.length, para: '/assinaturas' },
             ].map((item) => (
-              <Link key={item.rotulo} to={item.para} className="indicador" style={{ color: 'inherit' }}>
-                <div className="indicador-valor">{item.valor}</div>
-                <div className="indicador-rotulo">{item.rotulo}</div>
-              </Link>
+              <div className="col" key={item.rotulo}>
+                <Link to={item.para} className="indicador card h-100 card-interativo">
+                  <div className="card-body">
+                    <div className="indicador-valor">{item.valor}</div>
+                    <div className="indicador-rotulo">{item.rotulo}</div>
+                  </div>
+                </Link>
+              </div>
             ))}
           </section>
 
@@ -91,24 +96,25 @@ export function Inicio() {
                 </p>
               </Cartao>
             ) : (
-              <div className="grade">
+              <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
                 {dados.cursos.slice(-6).reverse().map((curso) => (
-                  <Link
-                    key={curso.idCurso}
-                    to={`/cursos/${curso.idCurso}`}
-                    style={{ color: 'inherit' }}
-                  >
-                    <Cartao interativo>
-                      <div className="linha" style={{ marginBottom: 'var(--e-2)' }}>
-                        {curso.nivel ? <Selo cor="marca">{curso.nivel}</Selo> : null}
-                        <span className="texto-terciario">{data(curso.dataPublicacao)}</span>
-                      </div>
-                      <p className="cartao-titulo">{curso.titulo}</p>
-                      <p className="texto-secundario texto-pequeno">
-                        {resumir(curso.descricao, 90) || 'Sem descrição.'}
-                      </p>
-                    </Cartao>
-                  </Link>
+                  <div className="col" key={curso.idCurso}>
+                    <Link
+                      to={`/cursos/${curso.idCurso}`}
+                      className="text-decoration-none text-body d-block h-100"
+                    >
+                      <Cartao interativo className="h-100">
+                        <div className="linha mb-2">
+                          {curso.nivel ? <Selo cor="marca">{curso.nivel}</Selo> : null}
+                          <span className="texto-terciario">{data(curso.dataPublicacao)}</span>
+                        </div>
+                        <p className="cartao-titulo">{curso.titulo}</p>
+                        <p className="texto-secundario texto-pequeno mb-0">
+                          {resumir(curso.descricao, 90) || 'Sem descrição.'}
+                        </p>
+                      </Cartao>
+                    </Link>
+                  </div>
                 ))}
               </div>
             )}
@@ -120,17 +126,17 @@ export function Inicio() {
                 <h2>Planos disponíveis</h2>
                 <Link to="/planos">Gerenciar</Link>
               </div>
-              <div className="grade">
+              <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
                 {dados.planos.map((plano) => (
-                  <Cartao key={plano.idPlano}>
-                    <p className="cartao-titulo">{plano.nome}</p>
-                    <p style={{ fontSize: 'var(--t-lg)', fontFamily: 'var(--fonte-titulo)' }}>
-                      {moeda(plano.preco)}
-                    </p>
-                    <p className="texto-terciario">
-                      por {plano.duracaoMeses} {plano.duracaoMeses === 1 ? 'mês' : 'meses'}
-                    </p>
-                  </Cartao>
+                  <div className="col" key={plano.idPlano}>
+                    <Cartao className="h-100">
+                      <p className="cartao-titulo">{plano.nome}</p>
+                      <p className="titulo fs-4 mb-1">{moeda(plano.preco)}</p>
+                      <p className="texto-terciario mb-0">
+                        por {plano.duracaoMeses} {plano.duracaoMeses === 1 ? 'mês' : 'meses'}
+                      </p>
+                    </Cartao>
+                  </div>
                 ))}
               </div>
             </section>

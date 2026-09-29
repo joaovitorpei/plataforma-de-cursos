@@ -6,7 +6,7 @@ Plataforma de cursos (LAB03): API em **NestJS + Prisma + PostgreSQL** e interfac
 ```
 plataformaCursos/
 ├── backend/     API NestJS, Prisma e o PostgreSQL em Docker
-└── frontend/    EduCursos: a tela, em React + TypeScript + Vite
+└── frontend/    EduCursos: a tela, em React + TypeScript + Vite + Bootstrap
 ```
 
 A maior parte dos comandos deste guia roda dentro da pasta `backend`:
@@ -374,4 +374,5 @@ Você está na pasta errada. Precisa estar em `backend`.
 **Backend:** NestJS 11 · Prisma 7 · PostgreSQL 16 (Docker) · class-validator ·
 Swagger · JWT (Passport) · bcrypt
 
-**Frontend:** React 19 · TypeScript · Vite · React Router · zod
+**Frontend:** React 19 · TypeScript · Vite · **Bootstrap 5** (tema próprio via
+Sass) · React Router · zod

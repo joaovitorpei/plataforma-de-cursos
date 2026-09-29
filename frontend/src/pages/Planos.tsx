@@ -40,32 +40,32 @@ export function Planos() {
       {carregando && !dados ? (
         <Carregando />
       ) : dados && dados.length > 0 ? (
-        <div className="grade">
+        <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
           {dados.map((plano) => (
-            <Cartao key={plano.idPlano}>
-              <p className="cartao-titulo">{plano.nome}</p>
-              <p style={{ fontSize: 'var(--t-xl)', fontFamily: 'var(--fonte-titulo)', fontWeight: 600 }}>
-                {moeda(plano.preco)}
-              </p>
-              <p className="texto-terciario">
-                por {plano.duracaoMeses} {plano.duracaoMeses === 1 ? 'mês' : 'meses'}
-              </p>
-              <p className="texto-secundario texto-pequeno" style={{ marginTop: 'var(--e-3)' }}>
-                {plano.descricao || 'Sem descrição.'}
-              </p>
-              <div className="linha" style={{ marginTop: 'var(--e-4)' }}>
-                <Link to={`/planos/${plano.idPlano}/editar`}>
-                  <Botao variante="secundario" tamanho="pequeno">Editar</Botao>
-                </Link>
-                <Botao
-                  variante="texto"
-                  tamanho="pequeno"
-                  onClick={() => exclusao.pedirConfirmacao(plano)}
-                >
-                  Excluir
-                </Botao>
-              </div>
-            </Cartao>
+            <div className="col" key={plano.idPlano}>
+              <Cartao className="h-100">
+                <p className="cartao-titulo">{plano.nome}</p>
+                <p className="titulo fs-2 fw-semibold mb-0">{moeda(plano.preco)}</p>
+                <p className="texto-terciario">
+                  por {plano.duracaoMeses} {plano.duracaoMeses === 1 ? 'mês' : 'meses'}
+                </p>
+                <p className="texto-secundario texto-pequeno mt-3">
+                  {plano.descricao || 'Sem descrição.'}
+                </p>
+                <div className="linha mt-3">
+                  <Link to={`/planos/${plano.idPlano}/editar`}>
+                    <Botao variante="secundario" tamanho="pequeno">Editar</Botao>
+                  </Link>
+                  <Botao
+                    variante="texto"
+                    tamanho="pequeno"
+                    onClick={() => exclusao.pedirConfirmacao(plano)}
+                  >
+                    Excluir
+                  </Botao>
+                </div>
+              </Cartao>
+            </div>
           ))}
         </div>
       ) : (

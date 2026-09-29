@@ -3,7 +3,11 @@ import type { ReactNode } from 'react';
 
 import { Botao } from './Botao';
 
-/** Diálogo simples: fecha no Esc e no clique fora. */
+/**
+ * Modal do Bootstrap controlado pelo React: em vez de carregar o JS do
+ * Bootstrap, aplicamos as classes `show` e o backdrop conforme o estado.
+ * Fecha no Esc e no clique fora.
+ */
 export function Modal({
   titulo,
   aberto,
@@ -25,34 +29,52 @@ export function Modal({
     }
 
     document.addEventListener('keydown', aoTeclar);
-    return () => document.removeEventListener('keydown', aoTeclar);
+    // Trava a rolagem do fundo enquanto o diálogo está aberto.
+    document.body.classList.add('modal-open');
+
+    return () => {
+      document.removeEventListener('keydown', aoTeclar);
+      document.body.classList.remove('modal-open');
+    };
   }, [aberto, aoFechar]);
 
   if (!aberto) return null;
 
   return (
-    <div
-      className="modal-fundo"
-      onClick={aoFechar}
-      role="presentation"
-    >
+    <>
+      <div className="modal-backdrop fade show" />
       <div
-        className="modal"
+        className="modal fade show d-block"
+        tabIndex={-1}
         role="dialog"
-        aria-modal="true"
-        aria-label={titulo}
-        onClick={(evento) => evento.stopPropagation()}
+        onClick={aoFechar}
       >
-        <h3 className="modal-titulo">{titulo}</h3>
-        {children}
-        <div className="modal-acoes">
-          {acoes ?? (
-            <Botao variante="secundario" onClick={aoFechar}>
-              Fechar
-            </Botao>
-          )}
+        <div
+          className="modal-dialog modal-dialog-centered"
+          role="document"
+          onClick={(evento) => evento.stopPropagation()}
+        >
+          <div className="modal-content">
+            <div className="modal-header">
+              <h2 className="modal-title h5">{titulo}</h2>
+              <button
+                type="button"
+                className="btn-close"
+                aria-label="Fechar"
+                onClick={aoFechar}
+              />
+            </div>
+            <div className="modal-body">{children}</div>
+            <div className="modal-footer">
+              {acoes ?? (
+                <Botao variante="secundario" onClick={aoFechar}>
+                  Fechar
+                </Botao>
+              )}
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
