@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { opcional } from './comum';
+
 export const NIVEIS = ['Iniciante', 'Intermediário', 'Avançado'] as const;
 export type Nivel = (typeof NIVEIS)[number];
 
@@ -22,9 +24,9 @@ export const cursoSchema = z.object({
   idInstrutor: z.coerce.number().int().positive('Selecione o instrutor'),
   idCategoria: z.coerce.number().int().positive('Selecione a categoria'),
   nivel: z.string().optional(),
-  dataPublicacao: z.string().optional(),
-  totalAulas: z.coerce.number().int().min(0, 'Não pode ser negativo').optional(),
-  totalHoras: z.coerce.number().int().min(0, 'Não pode ser negativo').optional(),
+  dataPublicacao: opcional(z.string()),
+  totalAulas: opcional(z.coerce.number().int().min(0, 'Não pode ser negativo')),
+  totalHoras: opcional(z.coerce.number().int().min(0, 'Não pode ser negativo')),
 });
 
 export type CursoEntrada = z.infer<typeof cursoSchema>;

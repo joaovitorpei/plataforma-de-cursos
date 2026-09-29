@@ -43,12 +43,12 @@ export function Inicio() {
       <section className="heroi">
         <h1>Olá, {primeiroNome}</h1>
         <p>
-          Este painel lê direto do banco da plataforma. Cada número abaixo é uma
-          consulta à API — atualize para ver o que mudou no PostgreSQL.
+          Seus cursos, trilhas e certificados em um só lugar. Acompanhe o
+          catálogo da plataforma e o andamento de cada aluno.
         </p>
         <div style={{ marginTop: 'var(--e-5)' }}>
           <Botao variante="secundario" onClick={() => void recarregar()} disabled={carregando}>
-            {carregando ? 'Atualizando…' : '↻ Atualizar do banco'}
+            {carregando ? 'Atualizando…' : '↻ Atualizar'}
           </Botao>
         </div>
       </section>

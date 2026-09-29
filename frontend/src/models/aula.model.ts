@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { opcional } from './comum';
+
 export const TIPOS_CONTEUDO = ['Video', 'Texto', 'Quiz'] as const;
 export type TipoConteudo = (typeof TIPOS_CONTEUDO)[number];
 
@@ -19,7 +21,7 @@ export const aulaSchema = z.object({
   titulo: z.string().min(2, 'O título é obrigatório'),
   tipoConteudo: z.string().min(1, 'Selecione o tipo de conteúdo'),
   urlConteudo: z.string().optional(),
-  duracaoMinutos: z.coerce.number().int().min(0, 'Não pode ser negativo').optional(),
+  duracaoMinutos: opcional(z.coerce.number().int().min(0, 'Não pode ser negativo')),
   ordem: z.coerce.number().int().min(1, 'A ordem começa em 1'),
 });
 

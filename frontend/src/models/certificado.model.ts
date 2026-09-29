@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { opcional } from './comum';
+
 /** Tabela Certificados. A dataEmissao é preenchida pelo banco. */
 export interface ICertificado {
   idCertificado: number;
@@ -13,7 +15,7 @@ export interface ICertificado {
 export const certificadoSchema = z.object({
   idUsuario: z.coerce.number().int().positive('Selecione o aluno'),
   idCurso: z.coerce.number().int().positive('Selecione o curso'),
-  idTrilha: z.coerce.number().int().optional(),
+  idTrilha: opcional(z.coerce.number().int()),
   codigoVerificacao: z.string().min(4, 'O código é obrigatório'),
 });
 

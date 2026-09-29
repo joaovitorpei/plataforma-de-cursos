@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { opcional } from './comum';
+
 /** Tabela Matriculas. A dataMatricula é preenchida pelo banco. */
 export interface IMatricula {
   idMatricula: number;
@@ -12,7 +14,7 @@ export interface IMatricula {
 export const matriculaSchema = z.object({
   idUsuario: z.coerce.number().int().positive('Selecione o aluno'),
   idCurso: z.coerce.number().int().positive('Selecione o curso'),
-  dataConclusao: z.string().optional(),
+  dataConclusao: opcional(z.string()),
 });
 
 export type MatriculaEntrada = z.infer<typeof matriculaSchema>;

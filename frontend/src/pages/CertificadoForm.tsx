@@ -29,10 +29,9 @@ export function CertificadoForm() {
 
   const enviar = useCallback(
     async (dados: CertificadoEntrada) => {
-      // idTrilha é opcional: se não escolheram, não mandamos o campo.
-      const corpo = dados.idTrilha ? dados : { ...dados, idTrilha: undefined };
-      if (editando) await certificadoService.atualizar(Number(id), corpo);
-      else await certificadoService.criar(corpo);
+      // O campo em branco já vira `undefined` no schema (ver models/comum.ts).
+      if (editando) await certificadoService.atualizar(Number(id), dados);
+      else await certificadoService.criar(dados);
       navegar('/certificados');
     },
     [editando, id, navegar],
