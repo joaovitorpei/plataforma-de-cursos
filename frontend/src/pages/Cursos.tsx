@@ -20,9 +20,7 @@ async function carregar() {
 }
 
 export function Cursos() {
-  const { dados, erro, carregando, recarregar } = useCarregamento(
-    useCallback(carregar, []),
-  );
+  const { dados, erro, carregando, recarregar } = useCarregamento(carregar);
   const [filtroCategoria, setFiltroCategoria] = useState('');
 
   const exclusao = useExclusao<ICurso>(

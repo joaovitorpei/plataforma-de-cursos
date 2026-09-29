@@ -1,4 +1,3 @@
-import { useCallback } from 'react';
 import { Link } from 'react-router-dom';
 
 import { useCarregamento, useExclusao } from '../hooks';
@@ -19,7 +18,7 @@ async function carregar() {
 }
 
 export function Trilhas() {
-  const { dados, erro, carregando, recarregar } = useCarregamento(useCallback(carregar, []));
+  const { dados, erro, carregando, recarregar } = useCarregamento(carregar);
 
   const exclusao = useExclusao<ITrilha>(
     (trilha) => trilhaService.excluir(trilha.idTrilha),
