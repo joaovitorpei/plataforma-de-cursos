@@ -5,7 +5,7 @@ import {
   Alerta, Botao, CabecalhoPagina, CampoSelect, CampoTexto, Carregando, Cartao,
 } from '../components/ui';
 import { moduloSchema } from '../models';
-import type { ICurso, ModuloEntrada } from '../models';
+import type { ICurso, IModulo, ModuloEntrada } from '../models';
 import { cursoService, moduloService } from '../services';
 import { useFormulario } from '../hooks';
 import { mensagemDeErro } from '../utils/erro';
@@ -17,6 +17,7 @@ export function ModuloForm() {
   const editando = Boolean(id);
 
   const [cursos, setCursos] = useState<ICurso[]>([]);
+  const [modulos, setModulos] = useState<IModulo[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [erroCarga, setErroCarga] = useState<string | null>(null);
 
@@ -39,7 +40,13 @@ export function ModuloForm() {
   useEffect(() => {
     async function iniciar() {
       try {
-        setCursos(await cursoService.listar());
+        const [listaCursos, listaModulos] = await Promise.all([
+          cursoService.listar(),
+          moduloService.listar(),
+        ]);
+        setCursos(listaCursos);
+        setModulos(listaModulos);
+
         if (editando) {
           const modulo = await moduloService.obter(Number(id));
           preencher({
@@ -56,6 +63,20 @@ export function ModuloForm() {
     }
     void iniciar();
   }, [editando, id, preencher]);
+
+  /**
+   * Ao escolher o curso, sugere a próxima ordem livre. Sem isso todo módulo
+   * novo nasceria com ordem 1 e a listagem do curso sairia embaralhada.
+   */
+  function aoEscolherCurso(evento: React.ChangeEvent<HTMLSelectElement>) {
+    const idCurso = evento.target.value;
+    const usadas = modulos
+      .filter((m) => String(m.idCurso) === idCurso)
+      .map((m) => m.ordem);
+    const proxima = usadas.length ? Math.max(...usadas) + 1 : 1;
+
+    preencher({ ...form.valores, idCurso, ordem: String(proxima) });
+  }
 
   if (carregando) return <Carregando />;
 
@@ -76,7 +97,7 @@ export function ModuloForm() {
             rotulo="Curso"
             name="idCurso"
             value={form.valores.idCurso}
-            onChange={form.alterar('idCurso')}
+            onChange={editando ? form.alterar('idCurso') : aoEscolherCurso}
             erro={form.erros.idCurso}
             opcoes={cursos.map((c) => ({ valor: c.idCurso, texto: c.titulo }))}
           />
@@ -98,7 +119,7 @@ export function ModuloForm() {
             value={form.valores.ordem}
             onChange={form.alterar('ordem')}
             erro={form.erros.ordem}
-            ajuda="Posição do módulo dentro do curso."
+            ajuda="Posição do módulo dentro do curso — sugerida pela próxima livre."
           />
 
           <div className="linha">

@@ -5,7 +5,7 @@ import {
   Alerta, Botao, CabecalhoPagina, CampoSelect, CampoTexto, Carregando, Cartao,
 } from '../components/ui';
 import { TIPOS_CONTEUDO, aulaSchema } from '../models';
-import type { AulaEntrada, IModulo } from '../models';
+import type { AulaEntrada, IAula, IModulo } from '../models';
 import { aulaService, moduloService } from '../services';
 import { useFormulario } from '../hooks';
 import { mensagemDeErro } from '../utils/erro';
@@ -21,6 +21,7 @@ export function AulaForm() {
   const editando = Boolean(id);
 
   const [modulos, setModulos] = useState<IModulo[]>([]);
+  const [aulas, setAulas] = useState<IAula[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [erroCarga, setErroCarga] = useState<string | null>(null);
 
@@ -39,7 +40,13 @@ export function AulaForm() {
   useEffect(() => {
     async function iniciar() {
       try {
-        setModulos(await moduloService.listar());
+        const [listaModulos, listaAulas] = await Promise.all([
+          moduloService.listar(),
+          aulaService.listar(),
+        ]);
+        setModulos(listaModulos);
+        setAulas(listaAulas);
+
         if (editando) {
           const aula = await aulaService.obter(Number(id));
           preencher({
@@ -60,6 +67,17 @@ export function AulaForm() {
     void iniciar();
   }, [editando, id, preencher]);
 
+  /** Ao escolher o módulo, sugere a próxima ordem livre dentro dele. */
+  function aoEscolherModulo(evento: React.ChangeEvent<HTMLSelectElement>) {
+    const idModulo = evento.target.value;
+    const usadas = aulas
+      .filter((a) => String(a.idModulo) === idModulo)
+      .map((a) => a.ordem);
+    const proxima = usadas.length ? Math.max(...usadas) + 1 : 1;
+
+    preencher({ ...form.valores, idModulo, ordem: String(proxima) });
+  }
+
   if (carregando) return <Carregando />;
 
   return (
@@ -79,7 +97,7 @@ export function AulaForm() {
             rotulo="Módulo"
             name="idModulo"
             value={form.valores.idModulo}
-            onChange={form.alterar('idModulo')}
+            onChange={editando ? form.alterar('idModulo') : aoEscolherModulo}
             erro={form.erros.idModulo}
             opcoes={modulos.map((m) => ({ valor: m.idModulo, texto: m.titulo }))}
           />
@@ -131,7 +149,7 @@ export function AulaForm() {
             value={form.valores.ordem}
             onChange={form.alterar('ordem')}
             erro={form.erros.ordem}
-            ajuda="Posição da aula dentro do módulo."
+            ajuda="Posição da aula dentro do módulo — sugerida pela próxima livre."
           />
 
           <div className="linha">
