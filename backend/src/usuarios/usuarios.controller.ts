@@ -8,7 +8,7 @@ import {
   Delete,
   UseGuards,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -35,7 +35,7 @@ export class UsuariosController {
 
   // Daqui para baixo é preciso enviar o token JWT.
   @ApiBearerAuth('token')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Get()
   @ApiOperation({ summary: 'Listar todos os usuários' })
   @ApiResponse({ status: 401, description: 'Token ausente ou inválido.' })
@@ -44,7 +44,7 @@ export class UsuariosController {
   }
 
   @ApiBearerAuth('token')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
   @ApiOperation({ summary: 'Buscar um usuário pelo ID' })
   @ApiResponse({ status: 401, description: 'Token ausente ou inválido.' })
@@ -53,7 +53,7 @@ export class UsuariosController {
   }
 
   @ApiBearerAuth('token')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
   @ApiOperation({ summary: 'Atualizar um usuário' })
   @ApiResponse({ status: 401, description: 'Token ausente ou inválido.' })
@@ -62,7 +62,7 @@ export class UsuariosController {
   }
 
   @ApiBearerAuth('token')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   @ApiOperation({ summary: 'Remover um usuário' })
   @ApiResponse({ status: 401, description: 'Token ausente ou inválido.' })
