@@ -554,7 +554,127 @@ Os outros 13 são o CRUD puro: controller chama service, service chama Prisma.
 
 ---
 
-## 11. Perguntas que o professor pode fazer
+## 11. Ordem para criar e para apagar
+
+As 14 tabelas se apoiam umas nas outras por **chave estrangeira**. Isso impõe
+duas ordens obrigatórias: o que criar antes, e o que apagar antes. Tentar fora
+de ordem dá erro — e desde a última correção o erro diz exatamente o quê.
+
+### Quem depende de quem
+
+```
+NÍVEL 0 — não dependem de ninguém, podem ser criados a qualquer momento
+   Usuários        Categorias        Planos
+       │                │               │
+       ├────────┬───────┤               │
+       ▼        ▼       ▼               ▼
+NÍVEL 1    Cursos     Trilhas      Assinaturas
+   (instrutor+categoria) (categoria)  (usuário+plano)
+       │        │                       │
+       ▼        ▼                       ▼
+NÍVEL 2   Módulos   Trilhas_Cursos   Pagamentos
+          Matrículas  Avaliações     (assinatura)
+          Certificados
+       │
+       ▼
+NÍVEL 3   Aulas  (módulo)
+       │
+       ▼
+NÍVEL 4   Progresso_Aulas  (usuário + aula)
+```
+
+### Ordem de criação
+
+Siga de cima para baixo. Dentro do mesmo nível, a ordem não importa.
+
+| # | Criar | Precisa que já exista |
+|---|---|---|
+| 1 | **Usuários** | — |
+| 2 | **Categorias** | — |
+| 3 | **Planos** | — |
+| 4 | **Cursos** | usuário (instrutor) + categoria |
+| 5 | **Trilhas** | categoria |
+| 6 | **Assinaturas** | usuário + plano |
+| 7 | **Módulos** | curso |
+| 8 | **Matrículas** | usuário + curso |
+| 9 | **Avaliações** | usuário + curso |
+| 10 | **Trilhas_Cursos** | trilha + curso |
+| 11 | **Certificados** | usuário + curso (+ trilha, se quiser) |
+| 12 | **Pagamentos** | assinatura |
+| 13 | **Aulas** | módulo |
+| 14 | **Progresso_Aulas** | usuário + aula |
+
+> **O caminho mais curto para uma demonstração completa:**
+> usuário → categoria → curso → módulo → aula → matrícula → progresso.
+> Sete cadastros e você já exercitou os quatro níveis, incluindo uma tabela de
+> chave composta.
+
+### Ordem de exclusão — o inverso
+
+Para apagar, comece pelas pontas. **Quem não tem ninguém dependendo dele sai
+primeiro.**
+
+| Apagar primeiro | Depois | Depois | Por último |
+|---|---|---|---|
+| Progresso_Aulas | Aulas | Módulos | Cursos |
+| Pagamentos | Assinaturas | — | Planos |
+| Trilhas_Cursos, Certificados | Trilhas | — | Categorias |
+| Matrículas, Avaliações | — | — | Usuários |
+
+### Quem me impede de apagar
+
+Esta é a tabela para consultar quando aparecer *"Não é possível excluir"*:
+
+| Para apagar… | antes é preciso apagar |
+|---|---|
+| **Usuário** | matrículas, avaliações, progresso, certificados, assinaturas **e os cursos que ele ministra** |
+| **Categoria** | cursos e trilhas dessa categoria |
+| **Curso** | módulos, matrículas, avaliações, certificados e vínculos com trilhas |
+| **Módulo** | as aulas dele |
+| **Aula** | os registros de progresso dela |
+| **Trilha** | os vínculos com cursos e os certificados dela |
+| **Plano** | as assinaturas desse plano |
+| **Assinatura** | os pagamentos dela |
+| Matrícula, Avaliação, Progresso, Trilha_Curso, Certificado, Pagamento | nada — são pontas, saem direto |
+
+> **Atenção ao usuário:** ele é o mais travado de todos, porque aparece em seis
+> tabelas. E tem uma armadilha: se a pessoa for **instrutora de algum curso**,
+> não dá para apagá-la enquanto o curso existir — mesmo que ela não tenha
+> matrícula nenhuma.
+
+### A mensagem de erro já te diz
+
+Não precisa decorar a tabela. Se você tentar apagar fora de ordem, a API
+responde dizendo **o que** está travando:
+
+```
+Não é possível excluir: existem módulos que dependem deste registro
+                                 ↑
+                        apague os módulos primeiro
+```
+
+E se você criar fora de ordem, ela diz **o que falta**:
+
+```
+O curso informado não existe   →  crie o curso antes do módulo
+A categoria informada não existe →  crie a categoria antes do curso
+```
+
+### Por que o banco é assim
+
+Isso se chama **integridade referencial**, e é o banco protegendo os dados de
+ficarem inconsistentes. Sem essa regra seria possível ter um módulo apontando
+para o curso 7 que não existe mais — um registro órfão, impossível de exibir na
+tela e difícil de rastrear depois.
+
+> Daria para configurar o Prisma com `onDelete: Cascade` — apagar o curso
+> levaria junto módulos e aulas, em cascata. **Não fizemos isso de propósito:**
+> num trabalho de faculdade, um clique apagando dezenas de registros em efeito
+> dominó é mais perigoso do que útil. Melhor o banco recusar e avisar.
+
+---
+
+## 12. Perguntas que o professor pode fazer
 
 **"Por que separar controller e service?"**
 Para cada um ter uma responsabilidade só. O controller cuida de HTTP; o service
