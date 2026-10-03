@@ -1,4 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+
+import { exigirDono, filtroDoDono } from '../auth/propriedade';
+import type { UsuarioLogado } from '../auth/usuario-logado';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateAssinaturaDto } from './dto/create-assinatura.dto';
 import { UpdateAssinaturaDto } from './dto/update-assinatura.dto';
@@ -7,7 +10,10 @@ import { UpdateAssinaturaDto } from './dto/update-assinatura.dto';
 export class AssinaturasService {
   constructor(private prisma: PrismaService) {}
 
-  create(createAssinaturaDto: CreateAssinaturaDto) {
+  create(createAssinaturaDto: CreateAssinaturaDto, logado: UsuarioLogado) {
+    // O aluno assina para si; o administrador pode assinar por alguém.
+    exigirDono(createAssinaturaDto.idUsuario, logado);
+
     const { dataInicio, dataFim, ...dados } = createAssinaturaDto;
     return this.prisma.assinatura.create({
       data: {
@@ -19,15 +25,27 @@ export class AssinaturasService {
     });
   }
 
-  findAll() {
-    return this.prisma.assinatura.findMany();
+  findAll(logado: UsuarioLogado) {
+    return this.prisma.assinatura.findMany({ where: filtroDoDono(logado) });
   }
 
-  findOne(id: number) {
-    return this.prisma.assinatura.findUnique({ where: { idAssinatura: id } });
+  async findOne(id: number, logado: UsuarioLogado) {
+    const assinatura = await this.prisma.assinatura.findUnique({
+      where: { idAssinatura: id },
+    });
+    if (!assinatura) throw new NotFoundException('Registro não encontrado');
+
+    exigirDono(assinatura.idUsuario, logado);
+    return assinatura;
   }
 
-  update(id: number, updateAssinaturaDto: UpdateAssinaturaDto) {
+  async update(
+    id: number,
+    updateAssinaturaDto: UpdateAssinaturaDto,
+    logado: UsuarioLogado,
+  ) {
+    await this.findOne(id, logado);
+
     const { dataInicio, dataFim, ...dados } = updateAssinaturaDto;
     return this.prisma.assinatura.update({
       where: { idAssinatura: id },
@@ -39,7 +57,19 @@ export class AssinaturasService {
     });
   }
 
-  remove(id: number) {
+  async remove(id: number, logado: UsuarioLogado) {
+    await this.findOne(id, logado);
     return this.prisma.assinatura.delete({ where: { idAssinatura: id } });
+  }
+
+  /** De quem é esta assinatura — usado pelos pagamentos. */
+  async donoDaAssinatura(idAssinatura: number): Promise<number> {
+    const assinatura = await this.prisma.assinatura.findUnique({
+      where: { idAssinatura },
+      select: { idUsuario: true },
+    });
+    if (!assinatura)
+      throw new NotFoundException('A assinatura informada não existe');
+    return assinatura.idUsuario;
   }
 }

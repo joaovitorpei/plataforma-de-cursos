@@ -10,9 +10,17 @@ import {
 import { AssinaturasService } from './assinaturas.service';
 import { CreateAssinaturaDto } from './dto/create-assinatura.dto';
 import { UpdateAssinaturaDto } from './dto/update-assinatura.dto';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import { Logado } from '../auth/usuario-logado';
+import type { UsuarioLogado } from '../auth/usuario-logado';
 
 @ApiTags('assinaturas')
+@ApiBearerAuth('token')
 @Controller('assinaturas')
 export class AssinaturasController {
   constructor(private readonly assinaturasService: AssinaturasService) {}
@@ -21,20 +29,23 @@ export class AssinaturasController {
   @ApiOperation({ summary: 'Criar uma nova assinatura' })
   @ApiResponse({ status: 201, description: 'Assinatura criada com sucesso.' })
   @ApiResponse({ status: 400, description: 'Dados inválidos.' })
-  create(@Body() createAssinaturaDto: CreateAssinaturaDto) {
-    return this.assinaturasService.create(createAssinaturaDto);
+  create(
+    @Body() createAssinaturaDto: CreateAssinaturaDto,
+    @Logado() logado: UsuarioLogado,
+  ) {
+    return this.assinaturasService.create(createAssinaturaDto, logado);
   }
 
   @Get()
   @ApiOperation({ summary: 'Listar todas as assinaturas' })
-  findAll() {
-    return this.assinaturasService.findAll();
+  findAll(@Logado() logado: UsuarioLogado) {
+    return this.assinaturasService.findAll(logado);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Buscar uma assinatura pelo ID' })
-  findOne(@Param('id') id: string) {
-    return this.assinaturasService.findOne(+id);
+  findOne(@Param('id') id: string, @Logado() logado: UsuarioLogado) {
+    return this.assinaturasService.findOne(+id, logado);
   }
 
   @Patch(':id')
@@ -42,13 +53,14 @@ export class AssinaturasController {
   update(
     @Param('id') id: string,
     @Body() updateAssinaturaDto: UpdateAssinaturaDto,
+    @Logado() logado: UsuarioLogado,
   ) {
-    return this.assinaturasService.update(+id, updateAssinaturaDto);
+    return this.assinaturasService.update(+id, updateAssinaturaDto, logado);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Remover uma assinatura' })
-  remove(@Param('id') id: string) {
-    return this.assinaturasService.remove(+id);
+  remove(@Param('id') id: string, @Logado() logado: UsuarioLogado) {
+    return this.assinaturasService.remove(+id, logado);
   }
 }

@@ -10,13 +10,22 @@ import {
 import { TrilhasService } from './trilhas.service';
 import { CreateTrilhaDto } from './dto/create-trilha.dto';
 import { UpdateTrilhaDto } from './dto/update-trilha.dto';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import { Perfis } from '../auth/perfis.decorator';
+import { Perfil } from '../generated/prisma/enums';
 
 @ApiTags('trilhas')
+@ApiBearerAuth('token')
 @Controller('trilhas')
 export class TrilhasController {
   constructor(private readonly trilhasService: TrilhasService) {}
 
+  @Perfis(Perfil.ADMIN)
   @Post()
   @ApiOperation({ summary: 'Cadastrar uma nova trilha' })
   @ApiResponse({ status: 201, description: 'Trilha criada com sucesso.' })
@@ -37,12 +46,14 @@ export class TrilhasController {
     return this.trilhasService.findOne(+id);
   }
 
+  @Perfis(Perfil.ADMIN)
   @Patch(':id')
   @ApiOperation({ summary: 'Atualizar uma trilha' })
   update(@Param('id') id: string, @Body() updateTrilhaDto: UpdateTrilhaDto) {
     return this.trilhasService.update(+id, updateTrilhaDto);
   }
 
+  @Perfis(Perfil.ADMIN)
   @Delete(':id')
   @ApiOperation({ summary: 'Remover uma trilha' })
   remove(@Param('id') id: string) {

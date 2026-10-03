@@ -10,13 +10,22 @@ import {
 import { CertificadosService } from './certificados.service';
 import { CreateCertificadoDto } from './dto/create-certificado.dto';
 import { UpdateCertificadoDto } from './dto/update-certificado.dto';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import { Perfis } from '../auth/perfis.decorator';
+import { Perfil } from '../generated/prisma/enums';
 
 @ApiTags('certificados')
+@ApiBearerAuth('token')
 @Controller('certificados')
 export class CertificadosController {
   constructor(private readonly certificadosService: CertificadosService) {}
 
+  @Perfis(Perfil.ADMIN)
   @Post()
   @ApiOperation({ summary: 'Emitir um novo certificado' })
   @ApiResponse({ status: 201, description: 'Certificado emitido com sucesso.' })
@@ -37,6 +46,7 @@ export class CertificadosController {
     return this.certificadosService.findOne(+id);
   }
 
+  @Perfis(Perfil.ADMIN)
   @Patch(':id')
   @ApiOperation({ summary: 'Atualizar um certificado' })
   update(
@@ -46,6 +56,7 @@ export class CertificadosController {
     return this.certificadosService.update(+id, updateCertificadoDto);
   }
 
+  @Perfis(Perfil.ADMIN)
   @Delete(':id')
   @ApiOperation({ summary: 'Remover um certificado' })
   remove(@Param('id') id: string) {

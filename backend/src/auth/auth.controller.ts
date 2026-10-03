@@ -2,12 +2,14 @@ import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
+import { Publico } from './publico.decorator';
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Publico()
   @Post('login')
   @HttpCode(HttpStatus.OK) // POST devolveria 201; no login o certo é 200
   @ApiOperation({ summary: 'Autenticar usuário e gerar token JWT' })

@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
@@ -17,6 +18,8 @@ import { CertificadosModule } from './certificados/certificados.module';
 import { PlanosModule } from './planos/planos.module';
 import { AssinaturasModule } from './assinaturas/assinaturas.module';
 import { PagamentosModule } from './pagamentos/pagamentos.module';
+import { JwtAuthGuard } from './auth/jwt-auth.guard';
+import { PerfisGuard } from './auth/perfis.guard';
 
 @Module({
   imports: [
@@ -38,6 +41,13 @@ import { PagamentosModule } from './pagamentos/pagamentos.module';
     PagamentosModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    // Guards globais, nesta ordem: primeiro "quem é você?", depois "você
+    // pode?". Com isso TODA rota exige login — menos as marcadas @Publico()
+    // — e as marcadas @Perfis(ADMIN) exigem também ser administrador.
+    { provide: APP_GUARD, useClass: JwtAuthGuard },
+    { provide: APP_GUARD, useClass: PerfisGuard },
+  ],
 })
 export class AppModule {}

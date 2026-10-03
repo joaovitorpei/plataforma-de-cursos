@@ -10,9 +10,17 @@ import {
 import { PagamentosService } from './pagamentos.service';
 import { CreatePagamentoDto } from './dto/create-pagamento.dto';
 import { UpdatePagamentoDto } from './dto/update-pagamento.dto';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import { Logado } from '../auth/usuario-logado';
+import type { UsuarioLogado } from '../auth/usuario-logado';
 
 @ApiTags('pagamentos')
+@ApiBearerAuth('token')
 @Controller('pagamentos')
 export class PagamentosController {
   constructor(private readonly pagamentosService: PagamentosService) {}
@@ -24,20 +32,23 @@ export class PagamentosController {
     description: 'Pagamento registrado com sucesso.',
   })
   @ApiResponse({ status: 400, description: 'Dados inválidos.' })
-  create(@Body() createPagamentoDto: CreatePagamentoDto) {
-    return this.pagamentosService.create(createPagamentoDto);
+  create(
+    @Body() createPagamentoDto: CreatePagamentoDto,
+    @Logado() logado: UsuarioLogado,
+  ) {
+    return this.pagamentosService.create(createPagamentoDto, logado);
   }
 
   @Get()
   @ApiOperation({ summary: 'Listar todos os pagamentos' })
-  findAll() {
-    return this.pagamentosService.findAll();
+  findAll(@Logado() logado: UsuarioLogado) {
+    return this.pagamentosService.findAll(logado);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Buscar um pagamento pelo ID' })
-  findOne(@Param('id') id: string) {
-    return this.pagamentosService.findOne(+id);
+  findOne(@Param('id') id: string, @Logado() logado: UsuarioLogado) {
+    return this.pagamentosService.findOne(+id, logado);
   }
 
   @Patch(':id')
@@ -45,13 +56,14 @@ export class PagamentosController {
   update(
     @Param('id') id: string,
     @Body() updatePagamentoDto: UpdatePagamentoDto,
+    @Logado() logado: UsuarioLogado,
   ) {
-    return this.pagamentosService.update(+id, updatePagamentoDto);
+    return this.pagamentosService.update(+id, updatePagamentoDto, logado);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Remover um pagamento' })
-  remove(@Param('id') id: string) {
-    return this.pagamentosService.remove(+id);
+  remove(@Param('id') id: string, @Logado() logado: UsuarioLogado) {
+    return this.pagamentosService.remove(+id, logado);
   }
 }

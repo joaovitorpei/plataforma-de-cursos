@@ -17,11 +17,20 @@ datasource db {
 // Core
 // ------------------------------------------------------------
 
+/// Define o que cada pessoa pode fazer na plataforma.
+/// USER  - aluno: vê o catálogo, se matricula, assiste e paga o que é seu.
+/// ADMIN - administrador/professor: mantém o catálogo e gerencia usuários.
+enum Perfil {
+  USER
+  ADMIN
+}
+
 model Usuario {
   idUsuario         Int             @id @default(autoincrement()) @map("ID_Usuario")
   nomeCompleto      String          @map("NomeCompleto")
   email             String          @unique @map("Email")
   senha             String          @map("SenhaHash")
+  perfil            Perfil          @default(USER) @map("Perfil")
   dataCadastro      DateTime        @default(now()) @map("DataCadastro") @db.Date
   cursosMinistrados Curso[]         @relation("InstrutorCursos")
   matriculas        Matricula[]

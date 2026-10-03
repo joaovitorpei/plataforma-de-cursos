@@ -28,7 +28,8 @@ const TRADUCOES: Record<string, Tradutor> = {
   isString: (rotulo) => `${rotulo} deve ser um texto`,
   isEmail: () => 'digite um e-mail válido',
   isInt: (rotulo) => `${rotulo} deve ser um número inteiro`,
-  isNumber: (rotulo) => `${rotulo} deve ser um número com no máximo 2 casas decimais`,
+  isNumber: (rotulo) =>
+    `${rotulo} deve ser um número com no máximo 2 casas decimais`,
   isPositive: (rotulo) => `${rotulo} deve ser maior que zero`,
   isBoolean: (rotulo) => `${rotulo} deve ser verdadeiro ou falso`,
   isDateString: (rotulo) => `${rotulo} deve estar no formato AAAA-MM-DD`,

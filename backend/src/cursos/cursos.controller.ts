@@ -10,13 +10,22 @@ import {
 import { CursosService } from './cursos.service';
 import { CreateCursoDto } from './dto/create-curso.dto';
 import { UpdateCursoDto } from './dto/update-curso.dto';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import { Perfis } from '../auth/perfis.decorator';
+import { Perfil } from '../generated/prisma/enums';
 
 @ApiTags('cursos')
+@ApiBearerAuth('token')
 @Controller('cursos')
 export class CursosController {
   constructor(private readonly cursosService: CursosService) {}
 
+  @Perfis(Perfil.ADMIN)
   @Post()
   @ApiOperation({ summary: 'Cadastrar um novo curso' })
   @ApiResponse({ status: 201, description: 'Curso criado com sucesso.' })
@@ -37,12 +46,14 @@ export class CursosController {
     return this.cursosService.findOne(+id);
   }
 
+  @Perfis(Perfil.ADMIN)
   @Patch(':id')
   @ApiOperation({ summary: 'Atualizar um curso' })
   update(@Param('id') id: string, @Body() updateCursoDto: UpdateCursoDto) {
     return this.cursosService.update(+id, updateCursoDto);
   }
 
+  @Perfis(Perfil.ADMIN)
   @Delete(':id')
   @ApiOperation({ summary: 'Remover um curso' })
   remove(@Param('id') id: string) {

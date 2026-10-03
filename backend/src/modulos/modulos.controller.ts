@@ -10,13 +10,22 @@ import {
 import { ModulosService } from './modulos.service';
 import { CreateModuloDto } from './dto/create-modulo.dto';
 import { UpdateModuloDto } from './dto/update-modulo.dto';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import { Perfis } from '../auth/perfis.decorator';
+import { Perfil } from '../generated/prisma/enums';
 
 @ApiTags('modulos')
+@ApiBearerAuth('token')
 @Controller('modulos')
 export class ModulosController {
   constructor(private readonly modulosService: ModulosService) {}
 
+  @Perfis(Perfil.ADMIN)
   @Post()
   @ApiOperation({ summary: 'Cadastrar um novo módulo' })
   @ApiResponse({ status: 201, description: 'Módulo criado com sucesso.' })
@@ -37,12 +46,14 @@ export class ModulosController {
     return this.modulosService.findOne(+id);
   }
 
+  @Perfis(Perfil.ADMIN)
   @Patch(':id')
   @ApiOperation({ summary: 'Atualizar um módulo' })
   update(@Param('id') id: string, @Body() updateModuloDto: UpdateModuloDto) {
     return this.modulosService.update(+id, updateModuloDto);
   }
 
+  @Perfis(Perfil.ADMIN)
   @Delete(':id')
   @ApiOperation({ summary: 'Remover um módulo' })
   remove(@Param('id') id: string) {

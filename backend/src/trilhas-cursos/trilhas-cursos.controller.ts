@@ -10,13 +10,22 @@ import {
 import { TrilhasCursosService } from './trilhas-cursos.service';
 import { CreateTrilhaCursoDto } from './dto/create-trilha-curso.dto';
 import { UpdateTrilhaCursoDto } from './dto/update-trilha-curso.dto';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import { Perfis } from '../auth/perfis.decorator';
+import { Perfil } from '../generated/prisma/enums';
 
 @ApiTags('trilhas-cursos')
+@ApiBearerAuth('token')
 @Controller('trilhas-cursos')
 export class TrilhasCursosController {
   constructor(private readonly trilhasCursosService: TrilhasCursosService) {}
 
+  @Perfis(Perfil.ADMIN)
   @Post()
   @ApiOperation({ summary: 'Adicionar um curso a uma trilha' })
   @ApiResponse({ status: 201, description: 'Curso adicionado com sucesso.' })
@@ -41,6 +50,7 @@ export class TrilhasCursosController {
     return this.trilhasCursosService.findOne(+idTrilha, +idCurso);
   }
 
+  @Perfis(Perfil.ADMIN)
   @Patch(':idTrilha/:idCurso')
   @ApiOperation({ summary: 'Atualizar a ordem de um curso na trilha' })
   update(
@@ -55,6 +65,7 @@ export class TrilhasCursosController {
     );
   }
 
+  @Perfis(Perfil.ADMIN)
   @Delete(':idTrilha/:idCurso')
   @ApiOperation({ summary: 'Remover um curso de uma trilha' })
   remove(

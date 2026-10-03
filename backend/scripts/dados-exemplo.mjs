@@ -8,6 +8,8 @@
  * percorre exatamente o mesmo caminho que o frontend.
  */
 
+import { execFileSync } from 'node:child_process';
+
 const API = process.env.API_URL ?? 'http://localhost:3000';
 const ADMIN = {
   nomeCompleto: 'Administrador EduCursos',
@@ -59,11 +61,18 @@ async function main() {
   // -------- usuário administrador + login --------
   console.log('Usuários');
   await criar('admin@educursos.com', '/usuarios', ADMIN);
+
+  // O cadastro pela API sempre cria USER. O primeiro administrador precisa
+  // ser promovido direto no banco — depois dele, um admin promove os outros.
+  execFileSync('node', ['scripts/tornar-admin.mjs', ADMIN.email], {
+    stdio: 'inherit',
+  });
+
   ({ access_token: token } = await chamar('/auth/login', 'POST', {
     email: ADMIN.email,
     senha: ADMIN.senha,
   }));
-  console.log('  ✓ autenticado\n');
+  console.log('  ✓ autenticado como ADMIN\n');
 
   const alunos = [];
   for (const [nome, email] of [
@@ -271,7 +280,9 @@ async function main() {
     });
   }
 
-  console.log('\nPronto. Entre com admin@educursos.com / senha123');
+  console.log('\nPronto. Duas contas para testar os dois lados:');
+  console.log('  ADMIN  admin@educursos.com / senha123  -> cria, edita e exclui tudo');
+  console.log('  ALUNO  ana@educursos.com   / senha123  -> só vê o catálogo e o que é dela');
 }
 
 main().catch((erro) => {
