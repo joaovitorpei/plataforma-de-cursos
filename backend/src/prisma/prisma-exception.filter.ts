@@ -18,6 +18,25 @@ import {
  * Sem isso qualquer violação de constraint vira um 500 genérico — e o nome cru
  * da constraint do PostgreSQL ("Modulos_ID_Curso_fkey") vazaria para a tela.
  */
+/**
+ * O `meta` do erro do Prisma não é tipado — o formato muda conforme o driver.
+ * Em vez de espalhar `any` pelo arquivo, descrevemos aqui o pouco que usamos.
+ */
+interface MetaDoErro {
+  target?: string | string[];
+  field_name?: string;
+  driverAdapterError?: {
+    cause?: {
+      table?: string;
+      constraint?: {
+        index?: string;
+        fields?: string[];
+        foreignKey?: string;
+      };
+    };
+  };
+}
+
 @Catch(Prisma.PrismaClientKnownRequestError)
 export class PrismaExceptionFilter implements ExceptionFilter {
   private readonly logger = new Logger(PrismaExceptionFilter.name);
@@ -90,16 +109,16 @@ export class PrismaExceptionFilter implements ExceptionFilter {
   private campoDuplicado(
     exception: Prisma.PrismaClientKnownRequestError,
   ): string {
-    const meta = (exception.meta ?? {}) as Record<string, any>;
+    const meta = (exception.meta ?? {}) as MetaDoErro;
 
     if (Array.isArray(meta.target)) {
-      return meta.target.map((c: string) => rotuloDaColuna(c)).join(' e ');
+      return meta.target.map((coluna) => rotuloDaColuna(coluna)).join(' e ');
     }
     if (typeof meta.target === 'string') return rotuloDaColuna(meta.target);
 
     const causa = meta.driverAdapterError?.cause;
-    const tabela: string | undefined = causa?.table;
-    const indice: string | undefined =
+    const tabela = causa?.table;
+    const indice =
       causa?.constraint?.index ?? causa?.constraint?.fields?.join(', ');
     if (!indice) return '';
 
@@ -119,14 +138,11 @@ export class PrismaExceptionFilter implements ExceptionFilter {
     dependentes: string;
     coluna: string;
   } {
-    const meta = (exception.meta ?? {}) as Record<string, any>;
-    const causa = meta.driverAdapterError?.cause;
+    const meta = (exception.meta ?? {}) as MetaDoErro;
+    const constraint = meta.driverAdapterError?.cause?.constraint;
 
-    const bruto: string =
-      (typeof meta.field_name === 'string' ? meta.field_name : '') ||
-      causa?.constraint?.foreignKey ||
-      causa?.constraint?.index ||
-      '';
+    const bruto =
+      meta.field_name ?? constraint?.foreignKey ?? constraint?.index ?? '';
 
     if (!bruto) return { dependentes: '', coluna: '' };
 
