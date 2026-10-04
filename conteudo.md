@@ -2,9 +2,16 @@
 
 Guia de estudo do `backend/src/usuarios/` e do `backend/src/auth/`.
 
-Escolhi esses dois porque os outros 13 recursos (cursos, categorias, planos…)
-seguem **exatamente o mesmo padrão** — quem entende `usuarios` entende todos.
-A diferença é que só o usuário tem senha, hash e JWT.
+Escolhi esses dois porque é neles que mora tudo o que os outros 13 recursos
+(cursos, categorias, planos…) apenas **usam**: a senha com hash, o login, o
+token e as regras de quem pode o quê.
+
+A plataforma tem dois tipos de conta:
+
+| Perfil | Quem é | O que faz |
+|---|---|---|
+| **USER** | aluno | vê o catálogo, se matricula, assiste ao que comprou, avalia e paga o que é seu |
+| **ADMIN** | professor | tudo isso **mais** criar, editar e excluir cursos, aulas, categorias e planos |
 
 ---
 
@@ -28,34 +35,47 @@ virasse um aplicativo de celular sem HTTP, o service continuaria igual.
 
 ## 2. O caminho de uma requisição
 
-Quando alguém faz `GET /usuarios/4` com um token, acontece isto, **nesta ordem**:
+Quando alguém faz `DELETE /cursos/4` com um token, acontece isto, **nesta ordem**:
 
 ```
-1. Chega a requisição          GET /usuarios/4
+1. Chega a requisição          DELETE /cursos/4
                                Authorization: Bearer eyJhbGci...
                                       │
-2. GUARD                       JwtAuthGuard confere o token
-   (auth/jwt-auth.guard.ts)    → inválido? para aqui com 401
-                                      │  válido, segue
-3. PIPE                        ValidationPipe valida o corpo
+2. GUARD 1 — quem é você?      JwtAuthGuard confere a assinatura e o prazo
+   (auth/jwt-auth.guard.ts)    → token ruim ou ausente? para aqui com 401
+                                      │  ok, req.user preenchido
+3. GUARD 2 — você pode?        PerfisGuard compara o perfil do token
+   (auth/perfis.guard.ts)        com o que a rota exige via @Perfis(ADMIN)
+                               → é aluno? para aqui com 403
+                                      │  é professor, segue
+4. PIPE                        ValidationPipe valida o corpo
    (main.ts)                   → inválido? para aqui com 400
                                       │
-4. CONTROLLER                  UsuariosController.findOne('4')
-   (usuarios.controller.ts)    converte "4" (texto) para 4 (número)
+5. CONTROLLER                  CursosController.remove('4')
+   (cursos.controller.ts)      converte "4" (texto) para 4 (número)
                                       │
-5. SERVICE                     UsuariosService.findOne(4)
-   (usuarios.service.ts)       monta a consulta
+6. SERVICE                     CursosService.remove(4)
+   (cursos.service.ts)         — nos recursos do aluno, é aqui que mora
+                                 a regra de dono (ver seção 11)
                                       │
-6. PRISMA                      SELECT ... FROM "Usuarios" WHERE "ID_Usuario" = 4
+7. PRISMA                      DELETE FROM "Cursos" WHERE "ID_Curso" = 4
    (prisma.service.ts)
                                       │
-7. Volta o JSON                { "idUsuario": 4, "nomeCompleto": "...", ... }
+8. Volta o JSON                { "idCurso": 4, "titulo": "...", ... }
 ```
 
-> **Detalhe que o professor pode cobrar:** o **guard roda antes do pipe**. Se o
-> token estiver vencido, você recebe **401** e a validação do corpo nem chega a
-> acontecer. Não dá para "testar a validação" sem estar autenticado numa rota
-> protegida.
+Três paradas possíveis, e cada código diz uma coisa diferente:
+
+| Código | Quem barrou | Significa |
+|---|---|---|
+| **401** | JwtAuthGuard | "não sei quem você é" — token ausente, inválido ou vencido |
+| **403** | PerfisGuard ou a regra de dono | "sei quem você é, e você não pode fazer isso" |
+| **400** | ValidationPipe | "sei quem você é e você pode, mas os dados estão errados" |
+
+> **Detalhe que o professor pode cobrar:** os **guards rodam antes do pipe**. Se
+> o token estiver vencido, você recebe **401** e a validação do corpo nem chega
+> a acontecer. E se você for aluno numa rota de professor, recebe **403** antes
+> de o controller existir — nenhuma linha do service roda.
 
 ---
 
@@ -141,37 +161,82 @@ O `+id` converte texto para número. **Por que precisa?** Porque na URL tudo é
 texto: `/usuarios/4` entrega a string `"4"`, e o Prisma espera o número `4`.
 Sem o `+`, o Prisma recusaria a consulta.
 
-### O cadastro é a única rota pública
+### Toda rota exige login — menos duas
+
+Os dois guards estão registrados como **globais** no `app.module.ts`:
 
 ```ts
-// Rota pública: sem ela ninguém conseguiria criar o primeiro usuário.
+providers: [
+  AppService,
+  { provide: APP_GUARD, useClass: JwtAuthGuard },
+  { provide: APP_GUARD, useClass: PerfisGuard },
+],
+```
+
+`APP_GUARD` é uma chave especial do NestJS: o que for registrado assim vale
+para **todas as rotas da aplicação**, sem precisar repetir `@UseGuards` em cada
+controller. Isso inverte o padrão — em vez de lembrar de proteger cada rota, é
+preciso lembrar de **liberar** as poucas que devem ficar abertas.
+
+As duas exceções são o cadastro e o login, marcadas com `@Publico()`:
+
+```ts
+@Publico()
 @Post()
 create(@Body() createUsuarioDto: CreateUsuarioDto) { ... }
 ```
 
-Esta é uma decisão de projeto, não um descuido. Se o `@UseGuards` estivesse na
-**classe inteira**, o cadastro também exigiria token — e aí ninguém nunca
-conseguiria se cadastrar, porque precisaria de um token que só se consegue
-fazendo login, que só funciona se você já tiver conta. Um nó impossível.
+Sem elas, ninguém conseguiria entrar na plataforma: para ter token é preciso
+logar, e para logar é preciso ter conta. Um nó impossível.
 
-Por isso o guard é aplicado **rota por rota**, e o `@Post()` fica de fora.
-
-### As rotas protegidas
+### As quatro marcações que aparecem nas rotas
 
 ```ts
-@ApiBearerAuth('token')
-@UseGuards(JwtAuthGuard)
+@Perfis(Perfil.ADMIN)        // só professor
 @Get()
+@ApiOperation({ ... })
 findAll() { ... }
 ```
 
-- **`@UseGuards(JwtAuthGuard)`** — exige o token de verdade
-- **`@ApiBearerAuth('token')`** — avisa o **Swagger** que esta rota precisa de
-  token, fazendo aparecer o cadeado 🔒 ao lado dela
+| Marcação | O que faz |
+|---|---|
+| `@Publico()` | libera a rota de qualquer token |
+| `@Perfis(Perfil.ADMIN)` | exige que o perfil no token seja ADMIN; aluno leva 403 |
+| `@Logado()` | injeta quem está logado como parâmetro do método |
+| `@ApiBearerAuth('token')` | só documentação: faz o cadeado 🔒 aparecer no Swagger |
 
-> O `'token'` dentro do parêntese não é mágico: é um nome que precisa ser
+> O `'token'` do `@ApiBearerAuth` não é mágico: é um nome que precisa ser
 > **idêntico** ao usado no `main.ts`, no `.addBearerAuth(..., 'token')`. É assim
 > que o Swagger liga o botão *Authorize* a esta rota.
+
+### Quando a regra não cabe num decorator
+
+Em `/usuarios` há um caso que nenhum guard resolve sozinho: o aluno pode ver e
+editar **o próprio cadastro**, mas não o dos outros. Isso depende do `id` que
+veio na URL, então vira um método do controller:
+
+```ts
+findOne(@Param('id') id: string, @Logado() logado: UsuarioLogado) {
+  this.somenteDonoOuAdmin(+id, logado);
+  return this.usuariosService.findOne(+id);
+}
+
+private somenteDonoOuAdmin(id: number, logado: UsuarioLogado): void {
+  if (ehAdmin(logado) || logado.idUsuario === id) return;
+  throw new ForbiddenException('Você só pode acessar o seu próprio cadastro');
+}
+```
+
+E há uma trava a mais no `update`: mesmo podendo editar o próprio cadastro, o
+aluno **não pode mudar o próprio perfil** — senão se promoveria a professor.
+
+```ts
+if (updateUsuarioDto.perfil !== undefined && !ehAdmin(logado)) {
+  throw new ForbiddenException(
+    'Somente um administrador pode alterar o perfil de um usuário',
+  );
+}
+```
 
 ---
 
@@ -281,8 +346,24 @@ export class CreateUsuarioDto {
   @IsString()
   @MinLength(6)
   senha: string;
+
+  @ApiPropertyOptional({ enum: Perfil, default: Perfil.USER })
+  @IsOptional()
+  @IsEnum(Perfil)
+  perfil?: Perfil;
 }
 ```
+
+O **`perfil`** é o campo que define se a conta é de aluno (`USER`) ou de
+professor (`ADMIN`). É opcional: quem não informar nasce `USER`, porque o banco
+tem `@default(USER)` na coluna.
+
+> **Vale saber, se o professor perguntar:** deixar essa escolha livre no
+> cadastro foi decisão de projeto, para facilitar a demonstração. Num sistema
+> aberto ao público, isso precisaria de alguma trava — convite, código de
+> instrutor ou aprovação — senão qualquer pessoa se promoveria. A autorização
+> em si continua real: um `USER` de fato não consegue criar nem apagar nada do
+> catálogo, e a API responde 403.
 
 Cada campo carrega **dois tipos de decorator**, com funções bem diferentes:
 
@@ -331,10 +412,30 @@ Em projetos com **TypeORM** em vez de Prisma, é nessa classe que ficariam os
 
 ---
 
-## 8. A pasta `auth/` — a autenticação
+## 8. A pasta `auth/` — autenticação e autorização
 
-São seis arquivos. Dá para entender pensando em dois momentos: **entrar** e
-**provar que já entrou**.
+São dez arquivos, e eles resolvem **duas perguntas diferentes**. Separar as duas
+é a ideia central desta pasta:
+
+| Pergunta | Nome técnico | Quem responde |
+|---|---|---|
+| *Quem é você?* | **autenticação** | `jwt.strategy.ts` + `jwt-auth.guard.ts` |
+| *Você pode fazer isso?* | **autorização** | `perfis.guard.ts` + `propriedade.ts` |
+
+```
+auth/
+├── dto/login.dto.ts        formato do login
+├── auth.controller.ts      POST /auth/login
+├── auth.service.ts         confere a senha e assina o token
+├── auth.module.ts          amarra tudo
+├── jwt.strategy.ts         ensina a ler o token
+├── jwt-auth.guard.ts       exige o token          ← autenticação
+├── publico.decorator.ts    @Publico() — libera a rota
+├── perfis.decorator.ts     @Perfis(ADMIN)
+├── perfis.guard.ts         confere o perfil        ← autorização
+├── usuario-logado.ts       @Logado() e o tipo UsuarioLogado
+└── propriedade.ts          regra de dono           ← autorização
+```
 
 ### `dto/login.dto.ts` — o formato do login
 
@@ -377,7 +478,11 @@ async login(loginDto: LoginDto) {
     throw new UnauthorizedException('E-mail ou senha incorretos');
   }
 
-  const payload: JwtPayload = { sub: usuario.idUsuario, email: usuario.email };
+  const payload: JwtPayload = {
+    sub: usuario.idUsuario,
+    email: usuario.email,
+    perfil: usuario.perfil,
+  };
   return { access_token: this.jwtService.sign(payload) };
 }
 ```
@@ -400,6 +505,16 @@ senha digitada e ver se os dois resultados batem.
 vem de *subject*, "de quem é este token". **Nada de senha aqui dentro**, porque
 o JWT é **assinado, não criptografado**: qualquer um consegue ler o conteúdo.
 
+> **Por que o `perfil` vai dentro do token?** Para o guard não precisar
+> consultar o banco a cada requisição — a informação chega junto com o pedido.
+> E não, isso não é inseguro: o token é **assinado**. Se alguém editar o
+> conteúdo trocando `"USER"` por `"ADMIN"`, a assinatura deixa de bater e o
+> token é recusado no passo anterior.
+>
+> O preço disso é que **o perfil só muda depois de sair e entrar de novo**. Se
+> um professor promover um aluno enquanto ele está logado, o token antigo
+> continua dizendo `USER` até expirar (1 hora) ou até ele fazer login outra vez.
+
 ### `jwt.strategy.ts` — a regra de leitura do token
 
 ```ts
@@ -409,8 +524,8 @@ super({
   secretOrKey: secret,
 });
 
-validate({ sub, email }: JwtPayload) {
-  return { idUsuario: sub, email };
+validate({ sub, email, perfil }: JwtPayload): UsuarioLogado {
+  return { idUsuario: sub, email, perfil };
 }
 ```
 
@@ -451,6 +566,74 @@ português que diz **o que fazer**.
 
 O `'jwt'` dentro do parêntese é o nome da estratégia — é o que liga o guard ao
 `JwtStrategy` do arquivo anterior.
+
+E tem um segundo trabalho: deixar passar as rotas marcadas com `@Publico()`.
+
+```ts
+canActivate(contexto: ExecutionContext) {
+  const ehPublico = this.reflector.getAllAndOverride<boolean>(E_PUBLICO, [
+    contexto.getHandler(),   // o método
+    contexto.getClass(),     // o controller
+  ]);
+  if (ehPublico) return true;
+
+  return super.canActivate(contexto);
+}
+```
+
+O **`Reflector`** é como o NestJS lê as marcações que os decorators deixaram.
+O `@Publico()` não faz nada sozinho — ele só grava `ehPublico = true` no método,
+e é aqui que alguém lê esse recado.
+
+### `perfis.guard.ts` — o porteiro da autorização
+
+```ts
+canActivate(contexto: ExecutionContext): boolean {
+  const exigidos = this.reflector.getAllAndOverride<Perfil[] | undefined>(
+    PERFIS_EXIGIDOS,
+    [contexto.getHandler(), contexto.getClass()],
+  );
+
+  // Rota sem @Perfis(): basta estar autenticado.
+  if (!exigidos?.length) return true;
+
+  const usuario = contexto.switchToHttp().getRequest().user;
+
+  if (!usuario || !exigidos.includes(usuario.perfil)) {
+    throw new ForbiddenException(
+      'Esta ação é restrita a administradores da plataforma',
+    );
+  }
+  return true;
+}
+```
+
+Mesma mecânica do anterior, outra pergunta. Ele roda **depois** do JwtAuthGuard,
+então o `request.user` já existe — foi o `JwtStrategy.validate()` que o colocou
+lá.
+
+Repare na linha do meio: **rota sem `@Perfis()` passa**. É o que permite o aluno
+ler o catálogo: aquelas rotas exigem login, mas não exigem perfil nenhum.
+
+### `usuario-logado.ts` — quem está logado, como parâmetro
+
+```ts
+export const Logado = createParamDecorator(
+  (_dados: unknown, contexto: ExecutionContext): UsuarioLogado => {
+    return contexto.switchToHttp().getRequest().user;
+  },
+);
+```
+
+Um **decorator de parâmetro** — escrito por nós, não vem do NestJS. Ele existe
+só por legibilidade:
+
+```ts
+create(@Body() dto: CreateMatriculaDto, @Logado() logado: UsuarioLogado)
+```
+
+é mais claro que receber `@Req() req` e depois escrever `req.user` com o tipo
+solto.
 
 ### `auth.module.ts` — amarrando tudo
 
@@ -513,44 +696,135 @@ guard de auth.
 2. LOGIN        POST /auth/login        (público)
                 bcrypt.compare → token assinado, válido por 1h
 
-3. USO          GET /usuarios           (protegido)
+3. USO          GET /cursos             (exige login, qualquer perfil)
                 Authorization: Bearer <token>
-                JwtAuthGuard confere → libera
+                JwtAuthGuard confere → PerfisGuard não exige nada → libera
 
-4. UMA HORA DEPOIS
-                mesma requisição → 401 → repetir o passo 2
+4. ESCRITA      DELETE /cursos/4        (exige login + ADMIN)
+                professor → 204
+                aluno     → 403 "Esta ação é restrita a administradores"
+
+5. UMA HORA DEPOIS
+                qualquer requisição → 401 → repetir o passo 2
 ```
 
 ---
 
-## 10. Por que os outros 13 recursos são mais simples
+## 10. Os três grupos de recursos
 
-Compare `cursos.service.ts` com `usuarios.service.ts`:
+Os 14 recursos não são todos iguais. Eles se dividem conforme **quem pode
+mexer neles**.
+
+### Grupo 1 — o catálogo: só professor escreve
+
+`categorias` · `cursos` · `modulos` · `aulas` · `trilhas` · `trilhas-cursos` ·
+`planos` · `certificados`
+
+Todo mundo logado **lê**; só `ADMIN` cria, edita e apaga. No controller isso é
+uma linha por rota de escrita:
 
 ```ts
-// cursos — não tem regra de negócio, só repassa
-create(createCursoDto: CreateCursoDto) {
-  return this.prisma.curso.create({ data: createCursoDto });
+@Perfis(Perfil.ADMIN)
+@Delete(':id')
+remove(@Param('id') id: string) { ... }
+```
+
+O service continua sendo o CRUD puro — ele nem sabe que existe perfil, porque o
+guard já barrou antes.
+
+### Grupo 2 — os recursos do aluno: regra de dono
+
+`matriculas` · `avaliacoes` · `progresso-aulas` · `assinaturas` · `pagamentos`
+
+Aqui o aluno **pode** escrever, mas só sobre o que é dele. Isso não cabe num
+decorator, porque depende do conteúdo do banco: para saber de quem é a matrícula
+7, é preciso buscá-la. Então a regra vive no service, em `auth/propriedade.ts`:
+
+```ts
+export function exigirDono(idDonoDoRegistro: number, logado: UsuarioLogado) {
+  if (ehAdmin(logado)) return;                       // professor passa sempre
+  if (logado.idUsuario === idDonoDoRegistro) return; // aluno passa se for dele
+  throw new ForbiddenException('...');
 }
 
-// usuarios — tem regra: a senha precisa virar hash
-async create(createUsuarioDto: CreateUsuarioDto) {
-  const senha = await this.gerarHash(createUsuarioDto.senha);
-  return this.prisma.usuario.create({ data: { ...createUsuarioDto, senha } });
+export function filtroDoDono(logado: UsuarioLogado) {
+  return ehAdmin(logado) ? undefined : { idUsuario: logado.idUsuario };
 }
 ```
 
-O recurso de usuários é o único que tem:
+E o service fica assim:
+
+```ts
+create(dto: CreateMatriculaDto, logado: UsuarioLogado) {
+  exigirDono(dto.idUsuario, logado);   // aluno só matricula a si mesmo
+  return this.prisma.matricula.create({ ... });
+}
+
+findAll(logado: UsuarioLogado) {
+  // `undefined` no where do Prisma significa "sem filtro"
+  return this.prisma.matricula.findMany({ where: filtroDoDono(logado) });
+}
+```
+
+Repare no efeito do `findAll`: **a mesma rota devolve coisas diferentes**. O
+professor vê as 7 matrículas da plataforma; o aluno vê as 3 dele. Não é a tela
+que filtra — é a API.
+
+> Dois casos fogem um pouco do molde:
+>
+> - **`progresso-aulas`** tem o id do usuário na própria chave primária, que vai
+>   na URL (`/progresso-aulas/13/2`). Não precisa consultar o banco: basta olhar
+>   o primeiro id da rota.
+> - **`pagamentos`** não guarda o id do usuário. Quem diz de quem ele é é a
+>   assinatura, então o service busca o dono lá antes de decidir.
+
+### Grupo 3 — `usuarios`, que é único
 
 | Só em `usuarios` | Por quê |
 |---|---|
 | `bcrypt` no create e no update | é o único com senha |
 | `findByEmail` | o login precisa buscar por e-mail |
 | `omit` da senha no Prisma | é o único com campo que não pode vazar |
-| `@UseGuards` nas rotas | é o único protegido |
+| `@Publico()` no cadastro | é a porta de entrada da plataforma |
+| regra de dono **no controller** | depende só do id da URL, não do banco |
 | `exports` no module | é o único que outro módulo usa |
 
-Os outros 13 são o CRUD puro: controller chama service, service chama Prisma.
+### A quarta camada: conteúdo liberado por matrícula
+
+Há ainda uma regra que não é sobre perfil nem sobre dono: **o aluno vê a lista
+de aulas de qualquer curso, mas só assiste às do curso em que se matriculou.**
+
+Isso vive em `aulas.service.ts`:
+
+```ts
+private async cursosLiberados(logado: UsuarioLogado) {
+  if (ehAdmin(logado)) return 'todos';
+
+  const matriculas = await this.prisma.matricula.findMany({
+    where: { idUsuario: logado.idUsuario },
+    select: { idCurso: true },
+  });
+  return new Set(matriculas.map((m) => m.idCurso));
+}
+```
+
+E a resposta de cada aula sai assim:
+
+```ts
+return {
+  ...dados,
+  idCurso: modulo.idCurso,
+  liberada,
+  urlConteudo: liberada ? dados.urlConteudo : null,   // ← o conteúdo some
+};
+```
+
+O título, o tipo e a duração continuam vindo — é o que permite a pessoa decidir
+se vale se matricular. O que não vem é o `urlConteudo`, o endereço do vídeo.
+
+> **Importante para a apresentação:** esconder não é o mesmo que bloquear. Aqui
+> o campo realmente **não sai do servidor** — nem abrindo o DevTools dá para
+> achar o endereço. Se a tela apenas escondesse o botão, o dado estaria lá.
 
 ---
 
@@ -715,18 +989,68 @@ tiver essa chave consegue forjar token de qualquer usuário.
 
 **"Por que o cadastro não exige token?"**
 Porque seria impossível criar o primeiro usuário: para ter token é preciso
-logar, e para logar é preciso ter conta. Por isso o guard é aplicado rota a
-rota, e o `POST /usuarios` fica público.
+logar, e para logar é preciso ter conta. Por isso ele é marcado `@Publico()`,
+junto com o login — as duas únicas rotas abertas da API.
 
 **"O que acontece se o token vencer?"**
 Qualquer rota protegida responde 401. No frontend isso é tratado: o token é
 apagado e a tela volta para o login automaticamente.
 
+---
+
+### Sobre perfis e permissão
+
+**"Qual a diferença entre autenticação e autorização?"**
+Autenticação é *quem é você* — resolvida pelo token e pelo `JwtAuthGuard`.
+Autorização é *você pode fazer isso* — resolvida pelo `PerfisGuard` e pela
+regra de dono. São dois guards separados, e dois códigos HTTP: **401** para a
+primeira, **403** para a segunda.
+
 **"Um aluno pode apagar um curso?"**
-Pode, e é assim de propósito. A tabela `Usuarios` do modelo não tem campo de
-papel — quem é instrutor é definido pelo relacionamento (`Cursos.ID_Instrutor`),
-não por uma coluna. Então a API trata todo usuário autenticado igual. Se fosse
-preciso diferenciar, daria para derivar do relacionamento sem mexer no banco.
+Não. A rota tem `@Perfis(Perfil.ADMIN)` e a API responde **403**. A tela também
+esconde o botão, mas isso é só conveniência — a proteção de verdade está na API.
+Mesmo forçando a requisição pelo Swagger ou por curl, o aluno leva 403.
+
+**"Onde fica guardado o perfil?"**
+Numa coluna `Perfil` da tabela `Usuarios`, como um **enum** do PostgreSQL com
+dois valores: `USER` e `ADMIN`. E vai também dentro do token, para o guard não
+precisar consultar o banco a cada requisição.
+
+**"Então dá para virar admin editando o token?"**
+Não. O JWT é **assinado** com a `JWT_SECRET`. Trocar `"USER"` por `"ADMIN"` no
+conteúdo faz a assinatura deixar de bater, e o token é recusado antes de chegar
+ao guard de perfil.
+
+**"Como alguém vira professor?"**
+Escolhendo no cadastro — a tela tem "Sou aluno" e "Sou professor". Foi uma
+decisão de projeto para facilitar a demonstração. Num sistema real isso
+precisaria de trava (convite, código de instrutor, aprovação), senão qualquer
+um se promove. O que **não** muda é a autorização em si: ela continua
+funcionando de verdade para quem já tem um perfil.
+
+**"Por que o aluno vê 3 matrículas e o professor vê 7, na mesma rota?"**
+Porque o service filtra pelo dono: `where: filtroDoDono(logado)`. Para o
+professor a função devolve `undefined`, que no Prisma significa "sem filtro".
+A rota é a mesma; o que muda é quem está perguntando.
+
+**"Por que a regra de dono não é um guard também?"**
+Porque o guard roda **antes** do controller e não conhece o banco. Para saber de
+quem é a matrícula 7, é preciso buscá-la — e quem fala com o banco é o service.
+Já a regra de perfil cabe num guard porque a resposta está no próprio token.
+
+**"O aluno consegue ver o vídeo de um curso em que não se matriculou?"**
+Não. A API devolve `urlConteudo: null` e `liberada: false` para quem não está
+matriculado. O título e a duração vêm — para a pessoa decidir se quer o curso —
+mas o endereço do conteúdo não sai do servidor.
+
+**"Por que o perfil só muda depois de sair e entrar?"**
+Porque ele viaja dentro do token, que é emitido no login e vale 1 hora. É o
+preço de não consultar o banco a cada requisição. A alternativa seria checar o
+perfil no banco toda vez — mais atual, porém mais lento.
+
+---
+
+### Outras
 
 **"Por que o login devolve 200 e não 201?"**
 Porque não cria recurso nenhum, só verifica credenciais. O `@HttpCode(200)`
