@@ -16,6 +16,9 @@ export interface ICurso {
   dataPublicacao: string | null;
   totalAulas: number | null;
   totalHoras: number | null;
+
+  /** Vem junto da API: o nome de quem ministra, para o catálogo. */
+  instrutor?: { nomeCompleto: string };
 }
 
 export const cursoSchema = z.object({

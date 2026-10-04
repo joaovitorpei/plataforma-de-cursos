@@ -2,7 +2,14 @@ import { Link } from 'react-router-dom';
 
 import { useCarregamento, useExclusao } from '../hooks';
 import {
-  Alerta, Botao, CabecalhoPagina, Carregando, ConfirmarExclusao, EstadoVazio, Selo, Tabela,
+  Alerta,
+  Botao,
+  CabecalhoPagina,
+  Carregando,
+  ConfirmarExclusao,
+  EstadoVazio,
+  Selo,
+  Tabela,
 } from '../components/ui';
 import type { Coluna } from '../components/ui';
 import { aulaService, moduloService } from '../services';
@@ -32,7 +39,11 @@ export function Aulas() {
       cabecalho: 'Módulo',
       celula: (a) => {
         const modulo = dados?.modulos.find((m) => m.idModulo === a.idModulo);
-        return modulo?.titulo ?? <span className="texto-terciario">módulo {a.idModulo}</span>;
+        return (
+          modulo?.titulo ?? (
+            <span className="texto-terciario">módulo {a.idModulo}</span>
+          )
+        );
       },
     },
     { cabecalho: 'Tipo', celula: (a) => <Selo>{a.tipoConteudo}</Selo> },
@@ -44,9 +55,15 @@ export function Aulas() {
       celula: (a) => (
         <>
           <Link to={`/aulas/${a.idAula}/editar`}>
-            <Botao variante="texto" tamanho="pequeno">Editar</Botao>
+            <Botao variante="texto" tamanho="pequeno">
+              Editar
+            </Botao>
           </Link>
-          <Botao variante="texto" tamanho="pequeno" onClick={() => exclusao.pedirConfirmacao(a)}>
+          <Botao
+            variante="texto"
+            tamanho="pequeno"
+            onClick={() => exclusao.pedirConfirmacao(a)}
+          >
             Excluir
           </Botao>
         </>
@@ -55,7 +72,9 @@ export function Aulas() {
   ];
 
   const ordenadas = dados
-    ? [...dados.aulas].sort((a, b) => a.idModulo - b.idModulo || a.ordem - b.ordem)
+    ? [...dados.aulas].sort(
+        (a, b) => a.idModulo - b.idModulo || a.ordem - b.ordem,
+      )
     : [];
 
   return (
@@ -64,7 +83,9 @@ export function Aulas() {
         titulo="Aulas"
         descricao="O conteúdo que o aluno assiste, dentro de cada módulo."
         acao={
-          <Link to="/aulas/nova"><Botao>Nova aula</Botao></Link>
+          <Link to="/aulas/nova">
+            <Botao>Nova aula</Botao>
+          </Link>
         }
       />
 
@@ -79,7 +100,11 @@ export function Aulas() {
         <EstadoVazio
           titulo="Nenhuma aula cadastrada"
           descricao="Crie um módulo antes de cadastrar aulas."
-          acao={<Link to="/aulas/nova"><Botao>Nova aula</Botao></Link>}
+          acao={
+            <Link to="/aulas/nova">
+              <Botao>Nova aula</Botao>
+            </Link>
+          }
         />
       )}
 

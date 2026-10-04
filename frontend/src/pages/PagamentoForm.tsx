@@ -2,11 +2,27 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import {
-  Alerta, Botao, CabecalhoPagina, CampoSelect, CampoTexto, Carregando, Cartao,
+  Alerta,
+  Botao,
+  CabecalhoPagina,
+  CampoSelect,
+  CampoTexto,
+  Carregando,
+  Cartao,
 } from '../components/ui';
 import { METODOS_PAGAMENTO, pagamentoSchema } from '../models';
-import type { IAssinatura, IPlano, IUsuario, PagamentoEntrada } from '../models';
-import { assinaturaService, pagamentoService, planoService, usuarioService } from '../services';
+import type {
+  IAssinatura,
+  IPlano,
+  IUsuario,
+  PagamentoEntrada,
+} from '../models';
+import {
+  assinaturaService,
+  pagamentoService,
+  planoService,
+  listarUsuariosVisiveis,
+} from '../services';
 import { useFormulario } from '../hooks';
 import { moeda } from '../utils/formato';
 import { mensagemDeErro } from '../utils/erro';
@@ -32,7 +48,12 @@ export function PagamentoForm() {
   );
 
   const form = useFormulario(
-    { idAssinatura: '', valorPago: '', metodoPagamento: '', idTransacaoGateway: '' },
+    {
+      idAssinatura: '',
+      valorPago: '',
+      metodoPagamento: '',
+      idTransacaoGateway: '',
+    },
     pagamentoSchema,
     enviar,
   );
@@ -41,11 +62,12 @@ export function PagamentoForm() {
   useEffect(() => {
     async function iniciar() {
       try {
-        const [listaAssinaturas, listaUsuarios, listaPlanos] = await Promise.all([
-          assinaturaService.listar(),
-          usuarioService.listar(),
-          planoService.listar(),
-        ]);
+        const [listaAssinaturas, listaUsuarios, listaPlanos] =
+          await Promise.all([
+            assinaturaService.listar(),
+            listarUsuariosVisiveis(),
+            planoService.listar(),
+          ]);
         setAssinaturas(listaAssinaturas);
         setUsuarios(listaUsuarios);
         setPlanos(listaPlanos);
@@ -95,7 +117,9 @@ export function PagamentoForm() {
 
   return (
     <div className="pilha">
-      <CabecalhoPagina titulo={editando ? 'Editar pagamento' : 'Registrar pagamento'} />
+      <CabecalhoPagina
+        titulo={editando ? 'Editar pagamento' : 'Registrar pagamento'}
+      />
       {erroCarga ? <Alerta tipo="erro">{erroCarga}</Alerta> : null}
 
       <Cartao>
@@ -112,7 +136,10 @@ export function PagamentoForm() {
             value={form.valores.idAssinatura}
             onChange={aoEscolherAssinatura}
             erro={form.erros.idAssinatura}
-            opcoes={assinaturas.map((a) => ({ valor: a.idAssinatura, texto: descrever(a) }))}
+            opcoes={assinaturas.map((a) => ({
+              valor: a.idAssinatura,
+              texto: descrever(a),
+            }))}
           />
 
           <div className="campos-lado-a-lado">
@@ -156,7 +183,9 @@ export function PagamentoForm() {
             <Botao type="submit" disabled={form.enviando}>
               {form.enviando ? 'Salvando…' : 'Salvar'}
             </Botao>
-            <Botao variante="secundario" onClick={() => navegar('/pagamentos')}>Cancelar</Botao>
+            <Botao variante="secundario" onClick={() => navegar('/pagamentos')}>
+              Cancelar
+            </Botao>
           </div>
         </form>
       </Cartao>

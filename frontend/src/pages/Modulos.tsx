@@ -2,7 +2,13 @@ import { Link } from 'react-router-dom';
 
 import { useCarregamento, useExclusao } from '../hooks';
 import {
-  Alerta, Botao, CabecalhoPagina, Carregando, ConfirmarExclusao, EstadoVazio, Tabela,
+  Alerta,
+  Botao,
+  CabecalhoPagina,
+  Carregando,
+  ConfirmarExclusao,
+  EstadoVazio,
+  Tabela,
 } from '../components/ui';
 import type { Coluna } from '../components/ui';
 import { cursoService, moduloService } from '../services';
@@ -25,7 +31,10 @@ export function Modulos() {
   );
 
   const colunas: Coluna<IModulo>[] = [
-    { cabecalho: '#', celula: (m) => <span className="mono">{m.idModulo}</span> },
+    {
+      cabecalho: '#',
+      celula: (m) => <span className="mono">{m.idModulo}</span>,
+    },
     { cabecalho: 'Título', celula: (m) => <strong>{m.titulo}</strong> },
     {
       cabecalho: 'Curso',
@@ -45,9 +54,15 @@ export function Modulos() {
       celula: (m) => (
         <>
           <Link to={`/modulos/${m.idModulo}/editar`}>
-            <Botao variante="texto" tamanho="pequeno">Editar</Botao>
+            <Botao variante="texto" tamanho="pequeno">
+              Editar
+            </Botao>
           </Link>
-          <Botao variante="texto" tamanho="pequeno" onClick={() => exclusao.pedirConfirmacao(m)}>
+          <Botao
+            variante="texto"
+            tamanho="pequeno"
+            onClick={() => exclusao.pedirConfirmacao(m)}
+          >
             Excluir
           </Botao>
         </>
@@ -56,7 +71,9 @@ export function Modulos() {
   ];
 
   const ordenados = dados
-    ? [...dados.modulos].sort((a, b) => a.idCurso - b.idCurso || a.ordem - b.ordem)
+    ? [...dados.modulos].sort(
+        (a, b) => a.idCurso - b.idCurso || a.ordem - b.ordem,
+      )
     : [];
 
   return (
@@ -65,7 +82,9 @@ export function Modulos() {
         titulo="Módulos"
         descricao="Blocos que organizam as aulas dentro de um curso."
         acao={
-          <Link to="/modulos/novo"><Botao>Novo módulo</Botao></Link>
+          <Link to="/modulos/novo">
+            <Botao>Novo módulo</Botao>
+          </Link>
         }
       />
 
@@ -79,7 +98,11 @@ export function Modulos() {
       ) : (
         <EstadoVazio
           titulo="Nenhum módulo cadastrado"
-          acao={<Link to="/modulos/novo"><Botao>Novo módulo</Botao></Link>}
+          acao={
+            <Link to="/modulos/novo">
+              <Botao>Novo módulo</Botao>
+            </Link>
+          }
         />
       )}
 

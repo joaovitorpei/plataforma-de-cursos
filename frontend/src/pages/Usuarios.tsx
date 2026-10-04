@@ -3,7 +3,13 @@ import { Link } from 'react-router-dom';
 
 import { useCarregamento, useExclusao } from '../hooks';
 import {
-  Alerta, Botao, CabecalhoPagina, Carregando, ConfirmarExclusao, EstadoVazio, Tabela,
+  Alerta,
+  Botao,
+  CabecalhoPagina,
+  Carregando,
+  ConfirmarExclusao,
+  EstadoVazio,
+  Tabela,
 } from '../components/ui';
 import type { Coluna } from '../components/ui';
 import { usuarioService } from '../services';
@@ -27,7 +33,9 @@ export function Usuarios() {
       cabecalho: 'Usuário',
       celula: (u) => (
         <div className="linha">
-          <span className="avatar" aria-hidden="true">{iniciais(u.nomeCompleto)}</span>
+          <span className="avatar" aria-hidden="true">
+            {iniciais(u.nomeCompleto)}
+          </span>
           <div>
             <strong>{u.nomeCompleto}</strong>
             <br />
@@ -36,7 +44,10 @@ export function Usuarios() {
         </div>
       ),
     },
-    { cabecalho: '#', celula: (u) => <span className="mono">{u.idUsuario}</span> },
+    {
+      cabecalho: '#',
+      celula: (u) => <span className="mono">{u.idUsuario}</span>,
+    },
     { cabecalho: 'Cadastro', celula: (u) => data(u.dataCadastro) },
     {
       cabecalho: 'Ações',
@@ -44,13 +55,19 @@ export function Usuarios() {
       celula: (u) => (
         <>
           <Link to={`/usuarios/${u.idUsuario}/editar`}>
-            <Botao variante="texto" tamanho="pequeno">Editar</Botao>
+            <Botao variante="texto" tamanho="pequeno">
+              Editar
+            </Botao>
           </Link>
           <Botao
             variante="texto"
             tamanho="pequeno"
             disabled={u.idUsuario === logado?.idUsuario}
-            title={u.idUsuario === logado?.idUsuario ? 'Você não pode excluir a si mesmo' : undefined}
+            title={
+              u.idUsuario === logado?.idUsuario
+                ? 'Você não pode excluir a si mesmo'
+                : undefined
+            }
             onClick={() => exclusao.pedirConfirmacao(u)}
           >
             Excluir
@@ -66,7 +83,9 @@ export function Usuarios() {
         titulo="Usuários"
         descricao="Alunos e instrutores. A senha fica guardada com hash e nunca volta da API."
         acao={
-          <Link to="/usuarios/novo"><Botao>Novo usuário</Botao></Link>
+          <Link to="/usuarios/novo">
+            <Botao>Novo usuário</Botao>
+          </Link>
         }
       />
 

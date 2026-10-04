@@ -3,11 +3,25 @@ import { Link, useParams } from 'react-router-dom';
 
 import { useCarregamento, useExclusao } from '../hooks';
 import {
-  Alerta, Botao, CabecalhoPagina, CampoSelect, CampoTexto, Carregando, Cartao,
-  ConfirmarExclusao, EstadoVazio, Selo, Tabela,
+  Alerta,
+  Botao,
+  CabecalhoPagina,
+  CampoSelect,
+  CampoTexto,
+  Carregando,
+  Cartao,
+  ConfirmarExclusao,
+  EstadoVazio,
+  Selo,
+  Tabela,
 } from '../components/ui';
 import type { Coluna } from '../components/ui';
-import { categoriaService, cursoService, trilhaCursoService, trilhaService } from '../services';
+import {
+  categoriaService,
+  cursoService,
+  trilhaCursoService,
+  trilhaService,
+} from '../services';
 import type { ITrilhaCurso } from '../models';
 import { mensagemDeErro } from '../utils/erro';
 
@@ -74,14 +88,19 @@ export function TrilhaDetalhe() {
   if (!dados?.trilha) return <EstadoVazio titulo="Trilha não encontrada" />;
 
   const { trilha, cursos, vinculos, categorias } = dados;
-  const categoria = categorias.find((c) => c.idCategoria === trilha.idCategoria);
+  const categoria = categorias.find(
+    (c) => c.idCategoria === trilha.idCategoria,
+  );
 
   // Só oferece cursos que ainda não estão na trilha.
   const jaNaTrilha = new Set(vinculos.map((v) => v.idCurso));
   const disponiveis = cursos.filter((c) => !jaNaTrilha.has(c.idCurso));
 
   const colunas: Coluna<ITrilhaCurso>[] = [
-    { cabecalho: 'Ordem', celula: (v) => <span className="mono">{v.ordem}</span> },
+    {
+      cabecalho: 'Ordem',
+      celula: (v) => <span className="mono">{v.ordem}</span>,
+    },
     {
       cabecalho: 'Curso',
       celula: (v) => {
@@ -105,7 +124,11 @@ export function TrilhaDetalhe() {
       cabecalho: 'Ações',
       acoes: true,
       celula: (v) => (
-        <Botao variante="texto" tamanho="pequeno" onClick={() => exclusao.pedirConfirmacao(v)}>
+        <Botao
+          variante="texto"
+          tamanho="pequeno"
+          onClick={() => exclusao.pedirConfirmacao(v)}
+        >
           Remover
         </Botao>
       ),
@@ -119,8 +142,12 @@ export function TrilhaDetalhe() {
         descricao={trilha.descricao ?? undefined}
         acao={
           <>
-            <Link to="/trilhas"><Botao variante="secundario">Voltar</Botao></Link>
-            <Link to={`/trilhas/${trilha.idTrilha}/editar`}><Botao>Editar</Botao></Link>
+            <Link to="/trilhas">
+              <Botao variante="secundario">Voltar</Botao>
+            </Link>
+            <Link to={`/trilhas/${trilha.idTrilha}/editar`}>
+              <Botao>Editar</Botao>
+            </Link>
           </>
         }
       />
@@ -166,7 +193,10 @@ export function TrilhaDetalhe() {
                   name="idCurso"
                   value={idCursoNovo}
                   onChange={(evento) => setIdCursoNovo(evento.target.value)}
-                  opcoes={disponiveis.map((c) => ({ valor: c.idCurso, texto: c.titulo }))}
+                  opcoes={disponiveis.map((c) => ({
+                    valor: c.idCurso,
+                    texto: c.titulo,
+                  }))}
                   required
                 />
 

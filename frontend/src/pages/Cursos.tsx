@@ -1,25 +1,33 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 
+import { useAuth } from '../auth/useAuth';
 import { useCarregamento, useExclusao } from '../hooks';
 import {
-  Alerta, Botao, CabecalhoPagina, CampoSelect, Carregando, Cartao,
-  ConfirmarExclusao, EstadoVazio, Selo,
+  Alerta,
+  Botao,
+  CabecalhoPagina,
+  CampoSelect,
+  Carregando,
+  Cartao,
+  ConfirmarExclusao,
+  EstadoVazio,
+  Selo,
 } from '../components/ui';
-import { categoriaService, cursoService, usuarioService } from '../services';
+import { categoriaService, cursoService } from '../services';
 import type { ICurso } from '../models';
 import { data, resumir } from '../utils/formato';
 
 async function carregar() {
-  const [cursos, categorias, usuarios] = await Promise.all([
+  const [cursos, categorias] = await Promise.all([
     cursoService.listar(),
     categoriaService.listar(),
-    usuarioService.listar(),
   ]);
-  return { cursos, categorias, usuarios };
+  return { cursos, categorias };
 }
 
 export function Cursos() {
+  const { ehAdmin } = useAuth();
   const { dados, erro, carregando, recarregar } = useCarregamento(carregar);
   const [filtroCategoria, setFiltroCategoria] = useState('');
 
@@ -34,17 +42,13 @@ export function Cursos() {
     [dados],
   );
 
-  const nomeInstrutor = useCallback(
-    (idInstrutor: number) =>
-      dados?.usuarios.find((u) => u.idUsuario === idInstrutor)?.nomeCompleto ?? '—',
-    [dados],
-  );
-
   /* A API não tem filtro por query string, então o filtro é feito aqui. */
   const cursosVisiveis = useMemo(() => {
     if (!dados) return [];
     if (!filtroCategoria) return dados.cursos;
-    return dados.cursos.filter((c) => String(c.idCategoria) === filtroCategoria);
+    return dados.cursos.filter(
+      (c) => String(c.idCategoria) === filtroCategoria,
+    );
   }, [dados, filtroCategoria]);
 
   return (
@@ -53,7 +57,11 @@ export function Cursos() {
         titulo="Cursos"
         descricao="O catálogo da plataforma."
         acao={
-          <Link to="/cursos/novo"><Botao>Novo curso</Botao></Link>
+          ehAdmin ? (
+            <Link to="/cursos/novo">
+              <Botao>Novo curso</Botao>
+            </Link>
+          ) : undefined
         }
       />
 
@@ -86,7 +94,9 @@ export function Cursos() {
                 <div className="col" key={curso.idCurso}>
                   <Cartao interativo className="h-100">
                     <div className="linha mb-2">
-                      <Selo cor="marca">{nomeCategoria(curso.idCategoria)}</Selo>
+                      <Selo cor="marca">
+                        {nomeCategoria(curso.idCategoria)}
+                      </Selo>
                       {curso.nivel ? <Selo>{curso.nivel}</Selo> : null}
                     </div>
 
@@ -102,24 +112,33 @@ export function Cursos() {
                     </p>
 
                     <p className="texto-terciario mt-3 mb-0">
-                      {nomeInstrutor(curso.idInstrutor)} · {curso.totalAulas ?? 0} aulas ·{' '}
-                      {curso.totalHoras ?? 0}h · {data(curso.dataPublicacao)}
+                      {curso.instrutor?.nomeCompleto ?? '—'} ·{' '}
+                      {curso.totalAulas ?? 0} aulas · {curso.totalHoras ?? 0}h ·{' '}
+                      {data(curso.dataPublicacao)}
                     </p>
 
                     <div className="linha mt-3">
                       <Link to={`/cursos/${curso.idCurso}`}>
-                        <Botao variante="secundario" tamanho="pequeno">Ver</Botao>
+                        <Botao variante="secundario" tamanho="pequeno">
+                          Ver
+                        </Botao>
                       </Link>
-                      <Link to={`/cursos/${curso.idCurso}/editar`}>
-                        <Botao variante="texto" tamanho="pequeno">Editar</Botao>
-                      </Link>
-                      <Botao
-                        variante="texto"
-                        tamanho="pequeno"
-                        onClick={() => exclusao.pedirConfirmacao(curso)}
-                      >
-                        Excluir
-                      </Botao>
+                      {ehAdmin ? (
+                        <>
+                          <Link to={`/cursos/${curso.idCurso}/editar`}>
+                            <Botao variante="texto" tamanho="pequeno">
+                              Editar
+                            </Botao>
+                          </Link>
+                          <Botao
+                            variante="texto"
+                            tamanho="pequeno"
+                            onClick={() => exclusao.pedirConfirmacao(curso)}
+                          >
+                            Excluir
+                          </Botao>
+                        </>
+                      ) : null}
                     </div>
                   </Cartao>
                 </div>
@@ -127,13 +146,23 @@ export function Cursos() {
             </div>
           ) : (
             <EstadoVazio
-              titulo={filtroCategoria ? 'Nenhum curso nesta categoria' : 'Nenhum curso cadastrado'}
+              titulo={
+                filtroCategoria
+                  ? 'Nenhum curso nesta categoria'
+                  : 'Nenhum curso cadastrado'
+              }
               descricao={
                 filtroCategoria
                   ? 'Tente outra categoria ou limpe o filtro.'
                   : 'Cadastre o primeiro curso do catálogo.'
               }
-              acao={<Link to="/cursos/novo"><Botao>Novo curso</Botao></Link>}
+              acao={
+                ehAdmin ? (
+                  <Link to="/cursos/novo">
+                    <Botao>Novo curso</Botao>
+                  </Link>
+                ) : undefined
+              }
             />
           )}
         </>

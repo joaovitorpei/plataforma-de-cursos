@@ -1,6 +1,10 @@
 import { z } from 'zod';
 
-export const METODOS_PAGAMENTO = ['Pix', 'Cartao de Credito', 'Boleto'] as const;
+export const METODOS_PAGAMENTO = [
+  'Pix',
+  'Cartao de Credito',
+  'Boleto',
+] as const;
 
 /** Tabela Pagamentos. O valorPago vem como texto (Decimal do Prisma). */
 export interface IPagamento {

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 
 import { ContextoAuth } from './contexto';
-import type { IUsuario } from '../models';
+import type { IUsuario, Perfil } from '../models';
 import {
   auth,
   gravarToken,
@@ -60,8 +60,8 @@ export function ProvedorAuth({ children }: { children: ReactNode }) {
   );
 
   const cadastrar = useCallback(
-    async (nome: string, email: string, senha: string) => {
-      await auth.cadastrar(nome, email, senha);
+    async (nome: string, email: string, senha: string, perfil: Perfil) => {
+      await auth.cadastrar(nome, email, senha, perfil);
       // Cadastrou, já entra: evita pedir a senha duas vezes seguidas.
       await entrar(email, senha);
     },
@@ -72,6 +72,7 @@ export function ProvedorAuth({ children }: { children: ReactNode }) {
     () => ({
       usuario,
       autenticado: usuario !== null,
+      ehAdmin: usuario?.perfil === 'ADMIN',
       carregando,
       entrar,
       cadastrar,
@@ -80,5 +81,7 @@ export function ProvedorAuth({ children }: { children: ReactNode }) {
     [usuario, carregando, entrar, cadastrar, sair],
   );
 
-  return <ContextoAuth.Provider value={valor}>{children}</ContextoAuth.Provider>;
+  return (
+    <ContextoAuth.Provider value={valor}>{children}</ContextoAuth.Provider>
+  );
 }

@@ -2,7 +2,13 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
 import {
-  Alerta, Botao, CabecalhoPagina, CampoSelect, CampoTexto, Carregando, Cartao,
+  Alerta,
+  Botao,
+  CabecalhoPagina,
+  CampoSelect,
+  CampoTexto,
+  Carregando,
+  Cartao,
 } from '../components/ui';
 import { moduloSchema } from '../models';
 import type { ICurso, IModulo, ModuloEntrada } from '../models';
@@ -126,7 +132,9 @@ export function ModuloForm() {
             <Botao type="submit" disabled={form.enviando}>
               {form.enviando ? 'Salvando…' : 'Salvar'}
             </Botao>
-            <Botao variante="secundario" onClick={() => navegar('/modulos')}>Cancelar</Botao>
+            <Botao variante="secundario" onClick={() => navegar('/modulos')}>
+              Cancelar
+            </Botao>
           </div>
         </form>
       </Cartao>

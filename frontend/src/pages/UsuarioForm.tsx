@@ -2,7 +2,12 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import {
-  Alerta, Botao, CabecalhoPagina, CampoTexto, Carregando, Cartao,
+  Alerta,
+  Botao,
+  CabecalhoPagina,
+  CampoTexto,
+  Carregando,
+  Cartao,
 } from '../components/ui';
 import { usuarioEdicaoSchema, usuarioSchema } from '../models';
 import type { UsuarioEntrada } from '../models';
@@ -44,7 +49,11 @@ export function UsuarioForm() {
     usuarioService
       .obter(Number(id))
       .then((usuario) =>
-        preencher({ nomeCompleto: usuario.nomeCompleto, email: usuario.email, senha: '' }),
+        preencher({
+          nomeCompleto: usuario.nomeCompleto,
+          email: usuario.email,
+          senha: '',
+        }),
       )
       .catch((excecao) => setErroCarga(mensagemDeErro(excecao)))
       .finally(() => setCarregando(false));
@@ -92,14 +101,20 @@ export function UsuarioForm() {
             value={form.valores.senha}
             onChange={form.alterar('senha')}
             erro={form.erros.senha}
-            ajuda={editando ? 'Deixe em branco para manter a senha atual.' : 'Mínimo de 6 caracteres.'}
+            ajuda={
+              editando
+                ? 'Deixe em branco para manter a senha atual.'
+                : 'Mínimo de 6 caracteres.'
+            }
           />
 
           <div className="linha">
             <Botao type="submit" disabled={form.enviando}>
               {form.enviando ? 'Salvando…' : 'Salvar'}
             </Botao>
-            <Botao variante="secundario" onClick={() => navegar('/usuarios')}>Cancelar</Botao>
+            <Botao variante="secundario" onClick={() => navegar('/usuarios')}>
+              Cancelar
+            </Botao>
           </div>
         </form>
       </Cartao>

@@ -2,17 +2,28 @@ import { Link } from 'react-router-dom';
 
 import { useCarregamento, useExclusao } from '../hooks';
 import {
-  Alerta, Botao, CabecalhoPagina, Carregando, ConfirmarExclusao, EstadoVazio, Selo, Tabela,
+  Alerta,
+  Botao,
+  CabecalhoPagina,
+  Carregando,
+  ConfirmarExclusao,
+  EstadoVazio,
+  Selo,
+  Tabela,
 } from '../components/ui';
 import type { Coluna } from '../components/ui';
-import { assinaturaService, planoService, usuarioService } from '../services';
+import {
+  assinaturaService,
+  planoService,
+  listarUsuariosVisiveis,
+} from '../services';
 import type { IAssinatura } from '../models';
 import { data, moeda } from '../utils/formato';
 
 async function carregar() {
   const [assinaturas, usuarios, planos] = await Promise.all([
     assinaturaService.listar(),
-    usuarioService.listar(),
+    listarUsuariosVisiveis(),
     planoService.listar(),
   ]);
   return { assinaturas, usuarios, planos };
@@ -21,7 +32,10 @@ async function carregar() {
 /** Uma assinatura está vigente se hoje está entre o início e o fim. */
 function vigente(assinatura: IAssinatura): boolean {
   const hoje = new Date().toISOString().slice(0, 10);
-  return assinatura.dataInicio.slice(0, 10) <= hoje && hoje <= assinatura.dataFim.slice(0, 10);
+  return (
+    assinatura.dataInicio.slice(0, 10) <= hoje &&
+    hoje <= assinatura.dataFim.slice(0, 10)
+  );
 }
 
 export function Assinaturas() {
@@ -33,11 +47,15 @@ export function Assinaturas() {
   );
 
   const colunas: Coluna<IAssinatura>[] = [
-    { cabecalho: '#', celula: (a) => <span className="mono">{a.idAssinatura}</span> },
+    {
+      cabecalho: '#',
+      celula: (a) => <span className="mono">{a.idAssinatura}</span>,
+    },
     {
       cabecalho: 'Assinante',
       celula: (a) =>
-        dados?.usuarios.find((u) => u.idUsuario === a.idUsuario)?.nomeCompleto ?? (
+        dados?.usuarios.find((u) => u.idUsuario === a.idUsuario)
+          ?.nomeCompleto ?? (
           <span className="texto-terciario">usuário {a.idUsuario}</span>
         ),
     },
@@ -60,7 +78,11 @@ export function Assinaturas() {
     {
       cabecalho: 'Situação',
       celula: (a) =>
-        vigente(a) ? <Selo cor="ok">Vigente</Selo> : <Selo cor="erro">Expirada</Selo>,
+        vigente(a) ? (
+          <Selo cor="ok">Vigente</Selo>
+        ) : (
+          <Selo cor="erro">Expirada</Selo>
+        ),
     },
     {
       cabecalho: 'Ações',
@@ -68,9 +90,15 @@ export function Assinaturas() {
       celula: (a) => (
         <>
           <Link to={`/assinaturas/${a.idAssinatura}/editar`}>
-            <Botao variante="texto" tamanho="pequeno">Editar</Botao>
+            <Botao variante="texto" tamanho="pequeno">
+              Editar
+            </Botao>
           </Link>
-          <Botao variante="texto" tamanho="pequeno" onClick={() => exclusao.pedirConfirmacao(a)}>
+          <Botao
+            variante="texto"
+            tamanho="pequeno"
+            onClick={() => exclusao.pedirConfirmacao(a)}
+          >
             Excluir
           </Botao>
         </>
@@ -84,7 +112,9 @@ export function Assinaturas() {
         titulo="Assinaturas"
         descricao="Quem contratou qual plano e por quanto tempo."
         acao={
-          <Link to="/assinaturas/nova"><Botao>Nova assinatura</Botao></Link>
+          <Link to="/assinaturas/nova">
+            <Botao>Nova assinatura</Botao>
+          </Link>
         }
       />
 
@@ -94,12 +124,20 @@ export function Assinaturas() {
       {carregando && !dados ? (
         <Carregando />
       ) : dados && dados.assinaturas.length > 0 ? (
-        <Tabela colunas={colunas} dados={dados.assinaturas} chave={(a) => a.idAssinatura} />
+        <Tabela
+          colunas={colunas}
+          dados={dados.assinaturas}
+          chave={(a) => a.idAssinatura}
+        />
       ) : (
         <EstadoVazio
           titulo="Nenhuma assinatura registrada"
           descricao="Cadastre um plano antes de criar assinaturas."
-          acao={<Link to="/assinaturas/nova"><Botao>Nova assinatura</Botao></Link>}
+          acao={
+            <Link to="/assinaturas/nova">
+              <Botao>Nova assinatura</Botao>
+            </Link>
+          }
         />
       )}
 

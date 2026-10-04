@@ -11,6 +11,12 @@ const COR: Record<Cor, string> = {
   destaque: 'text-bg-info',
 };
 
-export function Selo({ cor = 'neutro', children }: { cor?: Cor; children: ReactNode }) {
+export function Selo({
+  cor = 'neutro',
+  children,
+}: {
+  cor?: Cor;
+  children: ReactNode;
+}) {
   return <span className={`badge rounded-pill ${COR[cor]}`}>{children}</span>;
 }

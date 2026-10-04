@@ -2,11 +2,21 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import {
-  Alerta, Botao, CabecalhoPagina, CampoSelect, CampoTexto, Carregando, Cartao,
+  Alerta,
+  Botao,
+  CabecalhoPagina,
+  CampoSelect,
+  CampoTexto,
+  Carregando,
+  Cartao,
 } from '../components/ui';
 import { matriculaSchema } from '../models';
 import type { ICurso, IUsuario, MatriculaEntrada } from '../models';
-import { cursoService, matriculaService, usuarioService } from '../services';
+import {
+  cursoService,
+  matriculaService,
+  listarUsuariosVisiveis,
+} from '../services';
 import { useFormulario } from '../hooks';
 import { dataParaInput } from '../utils/formato';
 import { mensagemDeErro } from '../utils/erro';
@@ -41,7 +51,7 @@ export function MatriculaForm() {
     async function iniciar() {
       try {
         const [listaUsuarios, listaCursos] = await Promise.all([
-          usuarioService.listar(),
+          listarUsuariosVisiveis(),
           cursoService.listar(),
         ]);
         setUsuarios(listaUsuarios);
@@ -68,7 +78,9 @@ export function MatriculaForm() {
 
   return (
     <div className="pilha">
-      <CabecalhoPagina titulo={editando ? 'Editar matrícula' : 'Nova matrícula'} />
+      <CabecalhoPagina
+        titulo={editando ? 'Editar matrícula' : 'Nova matrícula'}
+      />
       {erroCarga ? <Alerta tipo="erro">{erroCarga}</Alerta> : null}
 
       <Cartao>
@@ -85,7 +97,10 @@ export function MatriculaForm() {
             value={form.valores.idUsuario}
             onChange={form.alterar('idUsuario')}
             erro={form.erros.idUsuario}
-            opcoes={usuarios.map((u) => ({ valor: u.idUsuario, texto: u.nomeCompleto }))}
+            opcoes={usuarios.map((u) => ({
+              valor: u.idUsuario,
+              texto: u.nomeCompleto,
+            }))}
           />
 
           <CampoSelect
@@ -111,7 +126,9 @@ export function MatriculaForm() {
             <Botao type="submit" disabled={form.enviando}>
               {form.enviando ? 'Salvando…' : 'Salvar'}
             </Botao>
-            <Botao variante="secundario" onClick={() => navegar('/matriculas')}>Cancelar</Botao>
+            <Botao variante="secundario" onClick={() => navegar('/matriculas')}>
+              Cancelar
+            </Botao>
           </div>
         </form>
       </Cartao>

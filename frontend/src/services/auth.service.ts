@@ -1,5 +1,5 @@
 import { requisitar } from './http';
-import type { IUsuario } from '../models';
+import type { IUsuario, Perfil } from '../models';
 
 export interface RespostaLogin {
   access_token: string;
@@ -21,10 +21,11 @@ export function cadastrar(
   nomeCompleto: string,
   email: string,
   senha: string,
+  perfil: Perfil,
 ): Promise<IUsuario> {
   return requisitar<IUsuario>('/usuarios', {
     method: 'POST',
-    body: JSON.stringify({ nomeCompleto, email, senha }),
+    body: JSON.stringify({ nomeCompleto, email, senha, perfil }),
   });
 }
 

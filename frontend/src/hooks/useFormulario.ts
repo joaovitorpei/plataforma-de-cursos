@@ -46,7 +46,8 @@ export function useFormulario<Valores extends Record<string, unknown>, Saida>(
         const encontrados: Erros<Valores> = {};
         for (const problema of resultado.error.issues) {
           const campo = problema.path[0] as keyof Valores | undefined;
-          if (campo && !encontrados[campo]) encontrados[campo] = problema.message;
+          if (campo && !encontrados[campo])
+            encontrados[campo] = problema.message;
         }
         setErros(encontrados);
         return;

@@ -10,7 +10,13 @@ export interface ItemMenu {
  * Dropdown do Bootstrap controlado pelo React — sem carregar o JS do
  * Bootstrap. Fecha no Esc, no clique fora e ao navegar.
  */
-export function MenuSuspenso({ titulo, itens }: { titulo: string; itens: ItemMenu[] }) {
+export function MenuSuspenso({
+  titulo,
+  itens,
+}: {
+  titulo: string;
+  itens: ItemMenu[];
+}) {
   const [aberto, setAberto] = useState(false);
   const caixa = useRef<HTMLLIElement>(null);
   const identificador = useId();
@@ -53,7 +59,9 @@ export function MenuSuspenso({ titulo, itens }: { titulo: string; itens: ItemMen
           <li key={item.para}>
             <NavLink
               to={item.para}
-              className={({ isActive }) => `dropdown-item${isActive ? ' active' : ''}`}
+              className={({ isActive }) =>
+                `dropdown-item${isActive ? ' active' : ''}`
+              }
               onClick={() => setAberto(false)}
             >
               {item.texto}

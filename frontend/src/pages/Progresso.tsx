@@ -2,17 +2,28 @@ import { Link } from 'react-router-dom';
 
 import { useCarregamento, useExclusao } from '../hooks';
 import {
-  Alerta, Botao, CabecalhoPagina, Carregando, ConfirmarExclusao, EstadoVazio, Selo, Tabela,
+  Alerta,
+  Botao,
+  CabecalhoPagina,
+  Carregando,
+  ConfirmarExclusao,
+  EstadoVazio,
+  Selo,
+  Tabela,
 } from '../components/ui';
 import type { Coluna } from '../components/ui';
-import { aulaService, progressoService, usuarioService } from '../services';
+import {
+  aulaService,
+  progressoService,
+  listarUsuariosVisiveis,
+} from '../services';
 import type { IProgressoAula } from '../models';
 import { data } from '../utils/formato';
 
 async function carregar() {
   const [progresso, usuarios, aulas] = await Promise.all([
     progressoService.listar(),
-    usuarioService.listar(),
+    listarUsuariosVisiveis(),
     aulaService.listar(),
   ]);
   return { progresso, usuarios, aulas };
@@ -31,7 +42,8 @@ export function Progresso() {
     {
       cabecalho: 'Aluno',
       celula: (p) =>
-        dados?.usuarios.find((u) => u.idUsuario === p.idUsuario)?.nomeCompleto ?? (
+        dados?.usuarios.find((u) => u.idUsuario === p.idUsuario)
+          ?.nomeCompleto ?? (
           <span className="texto-terciario">usuário {p.idUsuario}</span>
         ),
     },
@@ -63,9 +75,15 @@ export function Progresso() {
       celula: (p) => (
         <>
           <Link to={`/progresso/${p.idUsuario}/${p.idAula}/editar`}>
-            <Botao variante="texto" tamanho="pequeno">Editar</Botao>
+            <Botao variante="texto" tamanho="pequeno">
+              Editar
+            </Botao>
           </Link>
-          <Botao variante="texto" tamanho="pequeno" onClick={() => exclusao.pedirConfirmacao(p)}>
+          <Botao
+            variante="texto"
+            tamanho="pequeno"
+            onClick={() => exclusao.pedirConfirmacao(p)}
+          >
             Excluir
           </Botao>
         </>
@@ -79,7 +97,9 @@ export function Progresso() {
         titulo="Progresso nas aulas"
         descricao="Tabela de chave composta: cada registro é identificado pelo par aluno + aula."
         acao={
-          <Link to="/progresso/novo"><Botao>Registrar progresso</Botao></Link>
+          <Link to="/progresso/novo">
+            <Botao>Registrar progresso</Botao>
+          </Link>
         }
       />
 
@@ -98,7 +118,11 @@ export function Progresso() {
         <EstadoVazio
           titulo="Nenhum progresso registrado"
           descricao="Registre a conclusão de uma aula por um aluno."
-          acao={<Link to="/progresso/novo"><Botao>Registrar progresso</Botao></Link>}
+          acao={
+            <Link to="/progresso/novo">
+              <Botao>Registrar progresso</Botao>
+            </Link>
+          }
         />
       )}
 

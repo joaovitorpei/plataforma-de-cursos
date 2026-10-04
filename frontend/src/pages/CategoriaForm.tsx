@@ -2,7 +2,13 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import {
-  Alerta, Botao, CabecalhoPagina, CampoArea, CampoTexto, Carregando, Cartao,
+  Alerta,
+  Botao,
+  CabecalhoPagina,
+  CampoArea,
+  CampoTexto,
+  Carregando,
+  Cartao,
 } from '../components/ui';
 import { categoriaSchema } from '../models';
 import type { CategoriaEntrada } from '../models';
@@ -27,7 +33,11 @@ export function CategoriaForm() {
     [editando, id, navegar],
   );
 
-  const form = useFormulario({ nome: '', descricao: '' }, categoriaSchema, enviar);
+  const form = useFormulario(
+    { nome: '', descricao: '' },
+    categoriaSchema,
+    enviar,
+  );
   const { preencher } = form;
 
   useEffect(() => {
@@ -35,7 +45,10 @@ export function CategoriaForm() {
     categoriaService
       .obter(Number(id))
       .then((categoria) =>
-        preencher({ nome: categoria.nome, descricao: categoria.descricao ?? '' }),
+        preencher({
+          nome: categoria.nome,
+          descricao: categoria.descricao ?? '',
+        }),
       )
       .catch((excecao) => setErroCarga(mensagemDeErro(excecao)))
       .finally(() => setCarregando(false));

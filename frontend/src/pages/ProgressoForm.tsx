@@ -2,11 +2,21 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import {
-  Alerta, Botao, CabecalhoPagina, CampoSelect, CampoTexto, Carregando, Cartao,
+  Alerta,
+  Botao,
+  CabecalhoPagina,
+  CampoSelect,
+  CampoTexto,
+  Carregando,
+  Cartao,
 } from '../components/ui';
 import { STATUS_PROGRESSO, progressoSchema } from '../models';
 import type { IAula, IUsuario, ProgressoEntrada } from '../models';
-import { aulaService, progressoService, usuarioService } from '../services';
+import {
+  aulaService,
+  progressoService,
+  listarUsuariosVisiveis,
+} from '../services';
 import { useFormulario } from '../hooks';
 import { dataParaInput, hoje } from '../utils/formato';
 import { mensagemDeErro } from '../utils/erro';
@@ -29,7 +39,11 @@ export function ProgressoForm() {
     async (dados: ProgressoEntrada) => {
       if (editando) {
         const { idUsuario: _u, idAula: _a, ...alteraveis } = dados;
-        await progressoService.atualizar(Number(idUsuario), Number(idAula), alteraveis);
+        await progressoService.atualizar(
+          Number(idUsuario),
+          Number(idAula),
+          alteraveis,
+        );
       } else {
         await progressoService.criar(dados);
       }
@@ -49,14 +63,17 @@ export function ProgressoForm() {
     async function iniciar() {
       try {
         const [listaUsuarios, listaAulas] = await Promise.all([
-          usuarioService.listar(),
+          listarUsuariosVisiveis(),
           aulaService.listar(),
         ]);
         setUsuarios(listaUsuarios);
         setAulas(listaAulas);
 
         if (editando) {
-          const registro = await progressoService.obter(Number(idUsuario), Number(idAula));
+          const registro = await progressoService.obter(
+            Number(idUsuario),
+            Number(idAula),
+          );
           preencher({
             idUsuario: String(registro.idUsuario),
             idAula: String(registro.idAula),
@@ -102,7 +119,10 @@ export function ProgressoForm() {
             value={form.valores.idUsuario}
             onChange={form.alterar('idUsuario')}
             erro={form.erros.idUsuario}
-            opcoes={usuarios.map((u) => ({ valor: u.idUsuario, texto: u.nomeCompleto }))}
+            opcoes={usuarios.map((u) => ({
+              valor: u.idUsuario,
+              texto: u.nomeCompleto,
+            }))}
           />
 
           <CampoSelect
@@ -139,7 +159,9 @@ export function ProgressoForm() {
             <Botao type="submit" disabled={form.enviando}>
               {form.enviando ? 'Salvando…' : 'Salvar'}
             </Botao>
-            <Botao variante="secundario" onClick={() => navegar('/progresso')}>Cancelar</Botao>
+            <Botao variante="secundario" onClick={() => navegar('/progresso')}>
+              Cancelar
+            </Botao>
           </div>
         </form>
       </Cartao>

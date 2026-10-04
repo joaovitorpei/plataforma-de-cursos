@@ -2,6 +2,7 @@ export * from './Entrar';
 export * from './Cadastrar';
 export * from './Inicio';
 export * from './NaoEncontrado';
+export * from './SemPermissao';
 
 export * from './Usuarios';
 export * from './UsuarioForm';

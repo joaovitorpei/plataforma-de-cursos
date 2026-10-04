@@ -55,5 +55,7 @@ export function iniciais(nome?: string | null): string {
 /** Corta um texto longo para caber no cartão. */
 export function resumir(texto?: string | null, limite = 120): string {
   if (!texto) return '';
-  return texto.length <= limite ? texto : `${texto.slice(0, limite).trimEnd()}…`;
+  return texto.length <= limite
+    ? texto
+    : `${texto.slice(0, limite).trimEnd()}…`;
 }

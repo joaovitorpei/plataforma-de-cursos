@@ -2,11 +2,22 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import {
-  Alerta, Botao, CabecalhoPagina, CampoSelect, CampoTexto, Carregando, Cartao,
+  Alerta,
+  Botao,
+  CabecalhoPagina,
+  CampoSelect,
+  CampoTexto,
+  Carregando,
+  Cartao,
 } from '../components/ui';
 import { certificadoSchema } from '../models';
 import type { CertificadoEntrada, ICurso, ITrilha, IUsuario } from '../models';
-import { certificadoService, cursoService, trilhaService, usuarioService } from '../services';
+import {
+  certificadoService,
+  cursoService,
+  trilhaService,
+  listarUsuariosVisiveis,
+} from '../services';
 import { useFormulario } from '../hooks';
 import { mensagemDeErro } from '../utils/erro';
 
@@ -38,7 +49,12 @@ export function CertificadoForm() {
   );
 
   const form = useFormulario(
-    { idUsuario: '', idCurso: '', idTrilha: '', codigoVerificacao: sugerirCodigo() },
+    {
+      idUsuario: '',
+      idCurso: '',
+      idTrilha: '',
+      codigoVerificacao: sugerirCodigo(),
+    },
     certificadoSchema,
     enviar,
   );
@@ -48,7 +64,7 @@ export function CertificadoForm() {
     async function iniciar() {
       try {
         const [listaUsuarios, listaCursos, listaTrilhas] = await Promise.all([
-          usuarioService.listar(),
+          listarUsuariosVisiveis(),
           cursoService.listar(),
           trilhaService.listar(),
         ]);
@@ -61,7 +77,8 @@ export function CertificadoForm() {
           preencher({
             idUsuario: String(certificado.idUsuario),
             idCurso: String(certificado.idCurso),
-            idTrilha: certificado.idTrilha === null ? '' : String(certificado.idTrilha),
+            idTrilha:
+              certificado.idTrilha === null ? '' : String(certificado.idTrilha),
             codigoVerificacao: certificado.codigoVerificacao,
           });
         }
@@ -78,7 +95,9 @@ export function CertificadoForm() {
 
   return (
     <div className="pilha">
-      <CabecalhoPagina titulo={editando ? 'Editar certificado' : 'Emitir certificado'} />
+      <CabecalhoPagina
+        titulo={editando ? 'Editar certificado' : 'Emitir certificado'}
+      />
       {erroCarga ? <Alerta tipo="erro">{erroCarga}</Alerta> : null}
 
       <Cartao>
@@ -95,7 +114,10 @@ export function CertificadoForm() {
             value={form.valores.idUsuario}
             onChange={form.alterar('idUsuario')}
             erro={form.erros.idUsuario}
-            opcoes={usuarios.map((u) => ({ valor: u.idUsuario, texto: u.nomeCompleto }))}
+            opcoes={usuarios.map((u) => ({
+              valor: u.idUsuario,
+              texto: u.nomeCompleto,
+            }))}
           />
 
           <CampoSelect
@@ -114,7 +136,10 @@ export function CertificadoForm() {
             value={form.valores.idTrilha}
             onChange={form.alterar('idTrilha')}
             erro={form.erros.idTrilha}
-            opcoes={trilhas.map((t) => ({ valor: t.idTrilha, texto: t.titulo }))}
+            opcoes={trilhas.map((t) => ({
+              valor: t.idTrilha,
+              texto: t.titulo,
+            }))}
             ajuda="Preencha quando o certificado for de uma trilha inteira."
           />
 
@@ -131,7 +156,12 @@ export function CertificadoForm() {
             <Botao type="submit" disabled={form.enviando}>
               {form.enviando ? 'Salvando…' : 'Salvar'}
             </Botao>
-            <Botao variante="secundario" onClick={() => navegar('/certificados')}>Cancelar</Botao>
+            <Botao
+              variante="secundario"
+              onClick={() => navegar('/certificados')}
+            >
+              Cancelar
+            </Botao>
           </div>
         </form>
       </Cartao>

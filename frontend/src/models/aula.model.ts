@@ -14,6 +14,15 @@ export interface IAula {
   urlConteudo: string | null;
   duracaoMinutos: number | null;
   ordem: number;
+
+  /** Vem calculado pela API: o curso a que a aula pertence. */
+  idCurso: number;
+  /**
+   * Vem calculado pela API: true quando quem pediu pode assistir — ou seja,
+   * está matriculado no curso, ou é professor. Quando false, o
+   * `urlConteudo` volta nulo de propósito.
+   */
+  liberada: boolean;
 }
 
 export const aulaSchema = z.object({
@@ -21,7 +30,9 @@ export const aulaSchema = z.object({
   titulo: z.string().min(2, 'O título é obrigatório'),
   tipoConteudo: z.string().min(1, 'Selecione o tipo de conteúdo'),
   urlConteudo: z.string().optional(),
-  duracaoMinutos: opcional(z.coerce.number().int().min(0, 'Não pode ser negativo')),
+  duracaoMinutos: opcional(
+    z.coerce.number().int().min(0, 'Não pode ser negativo'),
+  ),
   ordem: z.coerce.number().int().min(1, 'A ordem começa em 1'),
 });
 

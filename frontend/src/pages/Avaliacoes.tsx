@@ -2,17 +2,28 @@ import { Link } from 'react-router-dom';
 
 import { useCarregamento, useExclusao } from '../hooks';
 import {
-  Alerta, Botao, CabecalhoPagina, Carregando, ConfirmarExclusao, EstadoVazio, Estrelas, Tabela,
+  Alerta,
+  Botao,
+  CabecalhoPagina,
+  Carregando,
+  ConfirmarExclusao,
+  EstadoVazio,
+  Estrelas,
+  Tabela,
 } from '../components/ui';
 import type { Coluna } from '../components/ui';
-import { avaliacaoService, cursoService, usuarioService } from '../services';
+import {
+  avaliacaoService,
+  cursoService,
+  listarUsuariosVisiveis,
+} from '../services';
 import type { IAvaliacao } from '../models';
 import { data, resumir } from '../utils/formato';
 
 async function carregar() {
   const [avaliacoes, usuarios, cursos] = await Promise.all([
     avaliacaoService.listar(),
-    usuarioService.listar(),
+    listarUsuariosVisiveis(),
     cursoService.listar(),
   ]);
   return { avaliacoes, usuarios, cursos };
@@ -42,14 +53,17 @@ export function Avaliacoes() {
     {
       cabecalho: 'Aluno',
       celula: (a) =>
-        dados?.usuarios.find((u) => u.idUsuario === a.idUsuario)?.nomeCompleto ?? (
+        dados?.usuarios.find((u) => u.idUsuario === a.idUsuario)
+          ?.nomeCompleto ?? (
           <span className="texto-terciario">usuário {a.idUsuario}</span>
         ),
     },
     {
       cabecalho: 'Comentário',
       celula: (a) => (
-        <span className="texto-secundario">{resumir(a.comentario, 60) || '—'}</span>
+        <span className="texto-secundario">
+          {resumir(a.comentario, 60) || '—'}
+        </span>
       ),
     },
     { cabecalho: 'Data', celula: (a) => data(a.dataAvaliacao) },
@@ -59,9 +73,15 @@ export function Avaliacoes() {
       celula: (a) => (
         <>
           <Link to={`/avaliacoes/${a.idAvaliacao}/editar`}>
-            <Botao variante="texto" tamanho="pequeno">Editar</Botao>
+            <Botao variante="texto" tamanho="pequeno">
+              Editar
+            </Botao>
           </Link>
-          <Botao variante="texto" tamanho="pequeno" onClick={() => exclusao.pedirConfirmacao(a)}>
+          <Botao
+            variante="texto"
+            tamanho="pequeno"
+            onClick={() => exclusao.pedirConfirmacao(a)}
+          >
             Excluir
           </Botao>
         </>
@@ -75,7 +95,9 @@ export function Avaliacoes() {
         titulo="Avaliações"
         descricao="Notas de 1 a 5 dadas pelos alunos aos cursos."
         acao={
-          <Link to="/avaliacoes/nova"><Botao>Nova avaliação</Botao></Link>
+          <Link to="/avaliacoes/nova">
+            <Botao>Nova avaliação</Botao>
+          </Link>
         }
       />
 
@@ -85,11 +107,19 @@ export function Avaliacoes() {
       {carregando && !dados ? (
         <Carregando />
       ) : dados && dados.avaliacoes.length > 0 ? (
-        <Tabela colunas={colunas} dados={dados.avaliacoes} chave={(a) => a.idAvaliacao} />
+        <Tabela
+          colunas={colunas}
+          dados={dados.avaliacoes}
+          chave={(a) => a.idAvaliacao}
+        />
       ) : (
         <EstadoVazio
           titulo="Nenhuma avaliação registrada"
-          acao={<Link to="/avaliacoes/nova"><Botao>Nova avaliação</Botao></Link>}
+          acao={
+            <Link to="/avaliacoes/nova">
+              <Botao>Nova avaliação</Botao>
+            </Link>
+          }
         />
       )}
 

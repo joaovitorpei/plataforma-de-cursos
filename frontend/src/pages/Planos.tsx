@@ -3,7 +3,13 @@ import { Link } from 'react-router-dom';
 
 import { useCarregamento, useExclusao } from '../hooks';
 import {
-  Alerta, Botao, CabecalhoPagina, Carregando, Cartao, ConfirmarExclusao, EstadoVazio,
+  Alerta,
+  Botao,
+  CabecalhoPagina,
+  Carregando,
+  Cartao,
+  ConfirmarExclusao,
+  EstadoVazio,
 } from '../components/ui';
 import { planoService } from '../services';
 import type { IPlano } from '../models';
@@ -25,7 +31,9 @@ export function Planos() {
         titulo="Planos"
         descricao="Assinaturas de acesso à plataforma."
         acao={
-          <Link to="/planos/novo"><Botao>Novo plano</Botao></Link>
+          <Link to="/planos/novo">
+            <Botao>Novo plano</Botao>
+          </Link>
         }
       />
 
@@ -40,16 +48,21 @@ export function Planos() {
             <div className="col" key={plano.idPlano}>
               <Cartao className="h-100">
                 <p className="cartao-titulo">{plano.nome}</p>
-                <p className="titulo fs-2 fw-semibold mb-0">{moeda(plano.preco)}</p>
+                <p className="titulo fs-2 fw-semibold mb-0">
+                  {moeda(plano.preco)}
+                </p>
                 <p className="texto-terciario">
-                  por {plano.duracaoMeses} {plano.duracaoMeses === 1 ? 'mês' : 'meses'}
+                  por {plano.duracaoMeses}{' '}
+                  {plano.duracaoMeses === 1 ? 'mês' : 'meses'}
                 </p>
                 <p className="texto-secundario texto-pequeno mt-3">
                   {plano.descricao || 'Sem descrição.'}
                 </p>
                 <div className="linha mt-3">
                   <Link to={`/planos/${plano.idPlano}/editar`}>
-                    <Botao variante="secundario" tamanho="pequeno">Editar</Botao>
+                    <Botao variante="secundario" tamanho="pequeno">
+                      Editar
+                    </Botao>
                   </Link>
                   <Botao
                     variante="texto"
@@ -66,7 +79,11 @@ export function Planos() {
       ) : (
         <EstadoVazio
           titulo="Nenhum plano cadastrado"
-          acao={<Link to="/planos/novo"><Botao>Novo plano</Botao></Link>}
+          acao={
+            <Link to="/planos/novo">
+              <Botao>Novo plano</Botao>
+            </Link>
+          }
         />
       )}
 

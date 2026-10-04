@@ -2,7 +2,14 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import {
-  Alerta, Botao, CabecalhoPagina, CampoArea, CampoSelect, CampoTexto, Carregando, Cartao,
+  Alerta,
+  Botao,
+  CabecalhoPagina,
+  CampoArea,
+  CampoSelect,
+  CampoTexto,
+  Carregando,
+  Cartao,
 } from '../components/ui';
 import { trilhaSchema } from '../models';
 import type { ICategoria, TrilhaEntrada } from '../models';
@@ -95,14 +102,19 @@ export function TrilhaForm() {
             value={form.valores.idCategoria}
             onChange={form.alterar('idCategoria')}
             erro={form.erros.idCategoria}
-            opcoes={categorias.map((c) => ({ valor: c.idCategoria, texto: c.nome }))}
+            opcoes={categorias.map((c) => ({
+              valor: c.idCategoria,
+              texto: c.nome,
+            }))}
           />
 
           <div className="linha">
             <Botao type="submit" disabled={form.enviando}>
               {form.enviando ? 'Salvando…' : 'Salvar'}
             </Botao>
-            <Botao variante="secundario" onClick={() => navegar('/trilhas')}>Cancelar</Botao>
+            <Botao variante="secundario" onClick={() => navegar('/trilhas')}>
+              Cancelar
+            </Botao>
           </div>
         </form>
       </Cartao>

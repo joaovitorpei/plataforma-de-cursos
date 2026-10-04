@@ -17,6 +17,8 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Perfis } from '../auth/perfis.decorator';
+import { Logado } from '../auth/usuario-logado';
+import type { UsuarioLogado } from '../auth/usuario-logado';
 import { Perfil } from '../generated/prisma/enums';
 
 @ApiTags('certificados')
@@ -36,14 +38,14 @@ export class CertificadosController {
 
   @Get()
   @ApiOperation({ summary: 'Listar todos os certificados' })
-  findAll() {
-    return this.certificadosService.findAll();
+  findAll(@Logado() logado: UsuarioLogado) {
+    return this.certificadosService.findAll(logado);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Buscar um certificado pelo ID' })
-  findOne(@Param('id') id: string) {
-    return this.certificadosService.findOne(+id);
+  findOne(@Param('id') id: string, @Logado() logado: UsuarioLogado) {
+    return this.certificadosService.findOne(+id, logado);
   }
 
   @Perfis(Perfil.ADMIN)

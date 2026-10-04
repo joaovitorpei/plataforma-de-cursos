@@ -2,17 +2,28 @@ import { Link } from 'react-router-dom';
 
 import { useCarregamento, useExclusao } from '../hooks';
 import {
-  Alerta, Botao, CabecalhoPagina, Carregando, ConfirmarExclusao, EstadoVazio, Selo, Tabela,
+  Alerta,
+  Botao,
+  CabecalhoPagina,
+  Carregando,
+  ConfirmarExclusao,
+  EstadoVazio,
+  Selo,
+  Tabela,
 } from '../components/ui';
 import type { Coluna } from '../components/ui';
-import { cursoService, matriculaService, usuarioService } from '../services';
+import {
+  cursoService,
+  matriculaService,
+  listarUsuariosVisiveis,
+} from '../services';
 import type { IMatricula } from '../models';
 import { data } from '../utils/formato';
 
 async function carregar() {
   const [matriculas, usuarios, cursos] = await Promise.all([
     matriculaService.listar(),
-    usuarioService.listar(),
+    listarUsuariosVisiveis(),
     cursoService.listar(),
   ]);
   return { matriculas, usuarios, cursos };
@@ -27,11 +38,15 @@ export function Matriculas() {
   );
 
   const colunas: Coluna<IMatricula>[] = [
-    { cabecalho: '#', celula: (m) => <span className="mono">{m.idMatricula}</span> },
+    {
+      cabecalho: '#',
+      celula: (m) => <span className="mono">{m.idMatricula}</span>,
+    },
     {
       cabecalho: 'Aluno',
       celula: (m) =>
-        dados?.usuarios.find((u) => u.idUsuario === m.idUsuario)?.nomeCompleto ?? (
+        dados?.usuarios.find((u) => u.idUsuario === m.idUsuario)
+          ?.nomeCompleto ?? (
           <span className="texto-terciario">usuário {m.idUsuario}</span>
         ),
     },
@@ -62,9 +77,15 @@ export function Matriculas() {
       celula: (m) => (
         <>
           <Link to={`/matriculas/${m.idMatricula}/editar`}>
-            <Botao variante="texto" tamanho="pequeno">Editar</Botao>
+            <Botao variante="texto" tamanho="pequeno">
+              Editar
+            </Botao>
           </Link>
-          <Botao variante="texto" tamanho="pequeno" onClick={() => exclusao.pedirConfirmacao(m)}>
+          <Botao
+            variante="texto"
+            tamanho="pequeno"
+            onClick={() => exclusao.pedirConfirmacao(m)}
+          >
             Excluir
           </Botao>
         </>
@@ -78,7 +99,9 @@ export function Matriculas() {
         titulo="Matrículas"
         descricao="Quem está inscrito em qual curso. A data de matrícula é preenchida pelo banco."
         acao={
-          <Link to="/matriculas/nova"><Botao>Nova matrícula</Botao></Link>
+          <Link to="/matriculas/nova">
+            <Botao>Nova matrícula</Botao>
+          </Link>
         }
       />
 
@@ -88,11 +111,19 @@ export function Matriculas() {
       {carregando && !dados ? (
         <Carregando />
       ) : dados && dados.matriculas.length > 0 ? (
-        <Tabela colunas={colunas} dados={dados.matriculas} chave={(m) => m.idMatricula} />
+        <Tabela
+          colunas={colunas}
+          dados={dados.matriculas}
+          chave={(m) => m.idMatricula}
+        />
       ) : (
         <EstadoVazio
           titulo="Nenhuma matrícula registrada"
-          acao={<Link to="/matriculas/nova"><Botao>Nova matrícula</Botao></Link>}
+          acao={
+            <Link to="/matriculas/nova">
+              <Botao>Nova matrícula</Botao>
+            </Link>
+          }
         />
       )}
 

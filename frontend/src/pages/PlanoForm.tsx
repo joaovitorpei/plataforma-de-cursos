@@ -2,7 +2,13 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import {
-  Alerta, Botao, CabecalhoPagina, CampoArea, CampoTexto, Carregando, Cartao,
+  Alerta,
+  Botao,
+  CabecalhoPagina,
+  CampoArea,
+  CampoTexto,
+  Carregando,
+  Cartao,
 } from '../components/ui';
 import { planoSchema } from '../models';
 import type { PlanoEntrada } from '../models';
@@ -115,7 +121,9 @@ export function PlanoForm() {
             <Botao type="submit" disabled={form.enviando}>
               {form.enviando ? 'Salvando…' : 'Salvar'}
             </Botao>
-            <Botao variante="secundario" onClick={() => navegar('/planos')}>Cancelar</Botao>
+            <Botao variante="secundario" onClick={() => navegar('/planos')}>
+              Cancelar
+            </Botao>
           </div>
         </form>
       </Cartao>

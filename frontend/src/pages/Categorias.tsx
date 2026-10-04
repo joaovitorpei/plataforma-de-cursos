@@ -3,7 +3,13 @@ import { Link } from 'react-router-dom';
 
 import { useCarregamento, useExclusao } from '../hooks';
 import {
-  Alerta, Botao, CabecalhoPagina, Carregando, ConfirmarExclusao, EstadoVazio, Tabela,
+  Alerta,
+  Botao,
+  CabecalhoPagina,
+  Carregando,
+  ConfirmarExclusao,
+  EstadoVazio,
+  Tabela,
 } from '../components/ui';
 import type { Coluna } from '../components/ui';
 import { categoriaService } from '../services';
@@ -20,11 +26,16 @@ export function Categorias() {
   );
 
   const colunas: Coluna<ICategoria>[] = [
-    { cabecalho: '#', celula: (c) => <span className="mono">{c.idCategoria}</span> },
+    {
+      cabecalho: '#',
+      celula: (c) => <span className="mono">{c.idCategoria}</span>,
+    },
     { cabecalho: 'Nome', celula: (c) => <strong>{c.nome}</strong> },
     {
       cabecalho: 'Descrição',
-      celula: (c) => <span className="texto-secundario">{c.descricao || '—'}</span>,
+      celula: (c) => (
+        <span className="texto-secundario">{c.descricao || '—'}</span>
+      ),
     },
     {
       cabecalho: 'Ações',
@@ -32,7 +43,9 @@ export function Categorias() {
       celula: (c) => (
         <>
           <Link to={`/categorias/${c.idCategoria}/editar`}>
-            <Botao variante="texto" tamanho="pequeno">Editar</Botao>
+            <Botao variante="texto" tamanho="pequeno">
+              Editar
+            </Botao>
           </Link>
           <Botao
             variante="texto"
@@ -69,7 +82,11 @@ export function Categorias() {
         <EstadoVazio
           titulo="Nenhuma categoria cadastrada"
           descricao="Crie a primeira categoria para começar a organizar os cursos."
-          acao={<Link to="/categorias/nova"><Botao>Nova categoria</Botao></Link>}
+          acao={
+            <Link to="/categorias/nova">
+              <Botao>Nova categoria</Botao>
+            </Link>
+          }
         />
       )}
 

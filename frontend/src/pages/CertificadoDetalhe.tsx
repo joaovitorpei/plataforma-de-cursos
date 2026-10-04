@@ -3,7 +3,12 @@ import { Link, useParams } from 'react-router-dom';
 
 import { useCarregamento } from '../hooks';
 import { Alerta, Botao, Carregando, EstadoVazio } from '../components/ui';
-import { certificadoService, cursoService, trilhaService, usuarioService } from '../services';
+import {
+  certificadoService,
+  cursoService,
+  trilhaService,
+  listarUsuariosVisiveis,
+} from '../services';
 import { data } from '../utils/formato';
 
 export function CertificadoDetalhe() {
@@ -12,7 +17,7 @@ export function CertificadoDetalhe() {
   const carregar = useCallback(async () => {
     const certificado = await certificadoService.obter(Number(id));
     const [usuarios, cursos, trilhas] = await Promise.all([
-      usuarioService.listar(),
+      listarUsuariosVisiveis(),
       cursoService.listar(),
       trilhaService.listar(),
     ]);
@@ -23,7 +28,8 @@ export function CertificadoDetalhe() {
 
   if (carregando) return <Carregando />;
   if (erro) return <Alerta tipo="erro">{erro}</Alerta>;
-  if (!dados?.certificado) return <EstadoVazio titulo="Certificado não encontrado" />;
+  if (!dados?.certificado)
+    return <EstadoVazio titulo="Certificado não encontrado" />;
 
   const { certificado, usuarios, cursos, trilhas } = dados;
   const aluno = usuarios.find((u) => u.idUsuario === certificado.idUsuario);
@@ -33,7 +39,9 @@ export function CertificadoDetalhe() {
   return (
     <div className="pilha-g">
       <div className="linha d-print-none">
-        <Link to="/certificados"><Botao variante="secundario">Voltar</Botao></Link>
+        <Link to="/certificados">
+          <Botao variante="secundario">Voltar</Botao>
+        </Link>
         <Botao onClick={() => window.print()}>Imprimir</Botao>
       </div>
 
@@ -69,7 +77,9 @@ export function CertificadoDetalhe() {
           </div>
           <div>
             <p className="texto-terciario">Código de verificação</p>
-            <p className="mono letra-espacada">{certificado.codigoVerificacao}</p>
+            <p className="mono letra-espacada">
+              {certificado.codigoVerificacao}
+            </p>
           </div>
         </div>
       </div>

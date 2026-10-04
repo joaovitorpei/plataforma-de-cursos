@@ -2,17 +2,27 @@ import { Link } from 'react-router-dom';
 
 import { useCarregamento, useExclusao } from '../hooks';
 import {
-  Alerta, Botao, CabecalhoPagina, Carregando, ConfirmarExclusao, EstadoVazio, Tabela,
+  Alerta,
+  Botao,
+  CabecalhoPagina,
+  Carregando,
+  ConfirmarExclusao,
+  EstadoVazio,
+  Tabela,
 } from '../components/ui';
 import type { Coluna } from '../components/ui';
-import { certificadoService, cursoService, usuarioService } from '../services';
+import {
+  certificadoService,
+  cursoService,
+  listarUsuariosVisiveis,
+} from '../services';
 import type { ICertificado } from '../models';
 import { data } from '../utils/formato';
 
 async function carregar() {
   const [certificados, usuarios, cursos] = await Promise.all([
     certificadoService.listar(),
-    usuarioService.listar(),
+    listarUsuariosVisiveis(),
     cursoService.listar(),
   ]);
   return { certificados, usuarios, cursos };
@@ -38,7 +48,8 @@ export function Certificados() {
     {
       cabecalho: 'Aluno',
       celula: (c) =>
-        dados?.usuarios.find((u) => u.idUsuario === c.idUsuario)?.nomeCompleto ?? (
+        dados?.usuarios.find((u) => u.idUsuario === c.idUsuario)
+          ?.nomeCompleto ?? (
           <span className="texto-terciario">usuário {c.idUsuario}</span>
         ),
     },
@@ -56,12 +67,20 @@ export function Certificados() {
       celula: (c) => (
         <>
           <Link to={`/certificados/${c.idCertificado}`}>
-            <Botao variante="texto" tamanho="pequeno">Ver</Botao>
+            <Botao variante="texto" tamanho="pequeno">
+              Ver
+            </Botao>
           </Link>
           <Link to={`/certificados/${c.idCertificado}/editar`}>
-            <Botao variante="texto" tamanho="pequeno">Editar</Botao>
+            <Botao variante="texto" tamanho="pequeno">
+              Editar
+            </Botao>
           </Link>
-          <Botao variante="texto" tamanho="pequeno" onClick={() => exclusao.pedirConfirmacao(c)}>
+          <Botao
+            variante="texto"
+            tamanho="pequeno"
+            onClick={() => exclusao.pedirConfirmacao(c)}
+          >
             Excluir
           </Botao>
         </>
@@ -75,7 +94,9 @@ export function Certificados() {
         titulo="Certificados"
         descricao="Emitidos na conclusão de um curso ou de uma trilha."
         acao={
-          <Link to="/certificados/novo"><Botao>Emitir certificado</Botao></Link>
+          <Link to="/certificados/novo">
+            <Botao>Emitir certificado</Botao>
+          </Link>
         }
       />
 
@@ -85,11 +106,19 @@ export function Certificados() {
       {carregando && !dados ? (
         <Carregando />
       ) : dados && dados.certificados.length > 0 ? (
-        <Tabela colunas={colunas} dados={dados.certificados} chave={(c) => c.idCertificado} />
+        <Tabela
+          colunas={colunas}
+          dados={dados.certificados}
+          chave={(c) => c.idCertificado}
+        />
       ) : (
         <EstadoVazio
           titulo="Nenhum certificado emitido"
-          acao={<Link to="/certificados/novo"><Botao>Emitir certificado</Botao></Link>}
+          acao={
+            <Link to="/certificados/novo">
+              <Botao>Emitir certificado</Botao>
+            </Link>
+          }
         />
       )}
 

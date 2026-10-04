@@ -2,7 +2,13 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import {
-  Alerta, Botao, CabecalhoPagina, CampoSelect, CampoTexto, Carregando, Cartao,
+  Alerta,
+  Botao,
+  CabecalhoPagina,
+  CampoSelect,
+  CampoTexto,
+  Carregando,
+  Cartao,
 } from '../components/ui';
 import { TIPOS_CONTEUDO, aulaSchema } from '../models';
 import type { AulaEntrada, IAula, IModulo } from '../models';
@@ -11,8 +17,12 @@ import { useFormulario } from '../hooks';
 import { mensagemDeErro } from '../utils/erro';
 
 const VAZIO = {
-  idModulo: '', titulo: '', tipoConteudo: '', urlConteudo: '',
-  duracaoMinutos: '', ordem: '1',
+  idModulo: '',
+  titulo: '',
+  tipoConteudo: '',
+  urlConteudo: '',
+  duracaoMinutos: '',
+  ordem: '1',
 };
 
 export function AulaForm() {
@@ -54,7 +64,8 @@ export function AulaForm() {
             titulo: aula.titulo,
             tipoConteudo: aula.tipoConteudo,
             urlConteudo: aula.urlConteudo ?? '',
-            duracaoMinutos: aula.duracaoMinutos === null ? '' : String(aula.duracaoMinutos),
+            duracaoMinutos:
+              aula.duracaoMinutos === null ? '' : String(aula.duracaoMinutos),
             ordem: String(aula.ordem),
           });
         }
@@ -99,7 +110,10 @@ export function AulaForm() {
             value={form.valores.idModulo}
             onChange={editando ? form.alterar('idModulo') : aoEscolherModulo}
             erro={form.erros.idModulo}
-            opcoes={modulos.map((m) => ({ valor: m.idModulo, texto: m.titulo }))}
+            opcoes={modulos.map((m) => ({
+              valor: m.idModulo,
+              texto: m.titulo,
+            }))}
           />
 
           <CampoTexto
@@ -156,7 +170,9 @@ export function AulaForm() {
             <Botao type="submit" disabled={form.enviando}>
               {form.enviando ? 'Salvando…' : 'Salvar'}
             </Botao>
-            <Botao variante="secundario" onClick={() => navegar('/aulas')}>Cancelar</Botao>
+            <Botao variante="secundario" onClick={() => navegar('/aulas')}>
+              Cancelar
+            </Botao>
           </div>
         </form>
       </Cartao>

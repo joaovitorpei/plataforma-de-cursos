@@ -2,11 +2,21 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import {
-  Alerta, Botao, CabecalhoPagina, CampoArea, CampoSelect, Carregando, Cartao,
+  Alerta,
+  Botao,
+  CabecalhoPagina,
+  CampoArea,
+  CampoSelect,
+  Carregando,
+  Cartao,
 } from '../components/ui';
 import { avaliacaoSchema } from '../models';
 import type { AvaliacaoEntrada, ICurso, IUsuario } from '../models';
-import { avaliacaoService, cursoService, usuarioService } from '../services';
+import {
+  avaliacaoService,
+  cursoService,
+  listarUsuariosVisiveis,
+} from '../services';
 import { useFormulario } from '../hooks';
 import { mensagemDeErro } from '../utils/erro';
 
@@ -48,7 +58,7 @@ export function AvaliacaoForm() {
     async function iniciar() {
       try {
         const [listaUsuarios, listaCursos] = await Promise.all([
-          usuarioService.listar(),
+          listarUsuariosVisiveis(),
           cursoService.listar(),
         ]);
         setUsuarios(listaUsuarios);
@@ -76,7 +86,9 @@ export function AvaliacaoForm() {
 
   return (
     <div className="pilha">
-      <CabecalhoPagina titulo={editando ? 'Editar avaliação' : 'Nova avaliação'} />
+      <CabecalhoPagina
+        titulo={editando ? 'Editar avaliação' : 'Nova avaliação'}
+      />
       {erroCarga ? <Alerta tipo="erro">{erroCarga}</Alerta> : null}
 
       <Cartao>
@@ -93,7 +105,10 @@ export function AvaliacaoForm() {
             value={form.valores.idUsuario}
             onChange={form.alterar('idUsuario')}
             erro={form.erros.idUsuario}
-            opcoes={usuarios.map((u) => ({ valor: u.idUsuario, texto: u.nomeCompleto }))}
+            opcoes={usuarios.map((u) => ({
+              valor: u.idUsuario,
+              texto: u.nomeCompleto,
+            }))}
           />
 
           <CampoSelect
@@ -127,7 +142,9 @@ export function AvaliacaoForm() {
             <Botao type="submit" disabled={form.enviando}>
               {form.enviando ? 'Salvando…' : 'Salvar'}
             </Botao>
-            <Botao variante="secundario" onClick={() => navegar('/avaliacoes')}>Cancelar</Botao>
+            <Botao variante="secundario" onClick={() => navegar('/avaliacoes')}>
+              Cancelar
+            </Botao>
           </div>
         </form>
       </Cartao>

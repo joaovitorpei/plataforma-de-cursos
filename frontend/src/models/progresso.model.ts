@@ -1,6 +1,10 @@
 import { z } from 'zod';
 
-export const STATUS_PROGRESSO = ['Concluido', 'Em andamento', 'Revisado'] as const;
+export const STATUS_PROGRESSO = [
+  'Concluido',
+  'Em andamento',
+  'Revisado',
+] as const;
 
 /** Tabela Progresso_Aulas — chave primária composta (idUsuario + idAula). */
 export interface IProgressoAula {

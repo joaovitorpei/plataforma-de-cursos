@@ -1,10 +1,22 @@
 import { Link } from 'react-router-dom';
 
+import { useAuth } from '../auth/useAuth';
 import { useCarregamento, useExclusao } from '../hooks';
 import {
-  Alerta, Botao, CabecalhoPagina, Carregando, Cartao, ConfirmarExclusao, EstadoVazio, Selo,
+  Alerta,
+  Botao,
+  CabecalhoPagina,
+  Carregando,
+  Cartao,
+  ConfirmarExclusao,
+  EstadoVazio,
+  Selo,
 } from '../components/ui';
-import { categoriaService, trilhaCursoService, trilhaService } from '../services';
+import {
+  categoriaService,
+  trilhaCursoService,
+  trilhaService,
+} from '../services';
 import type { ITrilha } from '../models';
 import { resumir } from '../utils/formato';
 
@@ -18,6 +30,7 @@ async function carregar() {
 }
 
 export function Trilhas() {
+  const { ehAdmin } = useAuth();
   const { dados, erro, carregando, recarregar } = useCarregamento(carregar);
 
   const exclusao = useExclusao<ITrilha>(
@@ -31,7 +44,9 @@ export function Trilhas() {
         titulo="Trilhas"
         descricao="Sequências de cursos que levam a um objetivo."
         acao={
-          <Link to="/trilhas/nova"><Botao>Nova trilha</Botao></Link>
+          <Link to="/trilhas/nova">
+            <Botao>Nova trilha</Botao>
+          </Link>
         }
       />
 
@@ -68,18 +83,26 @@ export function Trilhas() {
                   </p>
                   <div className="linha mt-3">
                     <Link to={`/trilhas/${trilha.idTrilha}`}>
-                      <Botao variante="secundario" tamanho="pequeno">Ver</Botao>
+                      <Botao variante="secundario" tamanho="pequeno">
+                        Ver
+                      </Botao>
                     </Link>
-                    <Link to={`/trilhas/${trilha.idTrilha}/editar`}>
-                      <Botao variante="texto" tamanho="pequeno">Editar</Botao>
-                    </Link>
-                    <Botao
-                      variante="texto"
-                      tamanho="pequeno"
-                      onClick={() => exclusao.pedirConfirmacao(trilha)}
-                    >
-                      Excluir
-                    </Botao>
+                    {ehAdmin ? (
+                      <>
+                        <Link to={`/trilhas/${trilha.idTrilha}/editar`}>
+                          <Botao variante="texto" tamanho="pequeno">
+                            Editar
+                          </Botao>
+                        </Link>
+                        <Botao
+                          variante="texto"
+                          tamanho="pequeno"
+                          onClick={() => exclusao.pedirConfirmacao(trilha)}
+                        >
+                          Excluir
+                        </Botao>
+                      </>
+                    ) : null}
                   </div>
                 </Cartao>
               </div>
@@ -89,7 +112,13 @@ export function Trilhas() {
       ) : (
         <EstadoVazio
           titulo="Nenhuma trilha cadastrada"
-          acao={<Link to="/trilhas/nova"><Botao>Nova trilha</Botao></Link>}
+          acao={
+            ehAdmin ? (
+              <Link to="/trilhas/nova">
+                <Botao>Nova trilha</Botao>
+              </Link>
+            ) : undefined
+          }
         />
       )}
 

@@ -31,7 +31,8 @@ function extrairMensagem(corpo: unknown, status: number): string {
     if (Array.isArray(message)) return message.join('. ');
     if (typeof message === 'string') return message;
   }
-  if (status === 0) return 'Não foi possível falar com o servidor. Ele está no ar?';
+  if (status === 0)
+    return 'Não foi possível falar com o servidor. Ele está no ar?';
   return `Erro ${status} ao falar com o servidor.`;
 }
 
@@ -50,7 +51,10 @@ export async function requisitar<T>(
 
   let resposta: Response;
   try {
-    resposta = await fetch(`${API}${caminho}`, { ...opcoes, headers: cabecalhos });
+    resposta = await fetch(`${API}${caminho}`, {
+      ...opcoes,
+      headers: cabecalhos,
+    });
   } catch {
     throw new ErroApi(0, extrairMensagem(null, 0));
   }

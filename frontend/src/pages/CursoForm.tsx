@@ -2,18 +2,35 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import {
-  Alerta, Botao, CabecalhoPagina, CampoArea, CampoSelect, CampoTexto, Carregando, Cartao,
+  Alerta,
+  Botao,
+  CabecalhoPagina,
+  CampoArea,
+  CampoSelect,
+  CampoTexto,
+  Carregando,
+  Cartao,
 } from '../components/ui';
 import { NIVEIS, cursoSchema } from '../models';
 import type { CursoEntrada, ICategoria, IUsuario } from '../models';
-import { categoriaService, cursoService, usuarioService } from '../services';
+import {
+  categoriaService,
+  cursoService,
+  listarUsuariosVisiveis,
+} from '../services';
 import { useFormulario } from '../hooks';
 import { dataParaInput } from '../utils/formato';
 import { mensagemDeErro } from '../utils/erro';
 
 const VAZIO = {
-  titulo: '', descricao: '', idInstrutor: '', idCategoria: '',
-  nivel: '', dataPublicacao: '', totalAulas: '', totalHoras: '',
+  titulo: '',
+  descricao: '',
+  idInstrutor: '',
+  idCategoria: '',
+  nivel: '',
+  dataPublicacao: '',
+  totalAulas: '',
+  totalHoras: '',
 };
 
 export function CursoForm() {
@@ -43,7 +60,7 @@ export function CursoForm() {
       try {
         const [listaCategorias, listaUsuarios] = await Promise.all([
           categoriaService.listar(),
-          usuarioService.listar(),
+          listarUsuariosVisiveis(),
         ]);
         setCategorias(listaCategorias);
         setUsuarios(listaUsuarios);
@@ -57,8 +74,10 @@ export function CursoForm() {
             idCategoria: String(curso.idCategoria),
             nivel: curso.nivel ?? '',
             dataPublicacao: dataParaInput(curso.dataPublicacao),
-            totalAulas: curso.totalAulas === null ? '' : String(curso.totalAulas),
-            totalHoras: curso.totalHoras === null ? '' : String(curso.totalHoras),
+            totalAulas:
+              curso.totalAulas === null ? '' : String(curso.totalAulas),
+            totalHoras:
+              curso.totalHoras === null ? '' : String(curso.totalHoras),
           });
         }
       } catch (excecao) {
@@ -111,7 +130,10 @@ export function CursoForm() {
               value={form.valores.idInstrutor}
               onChange={form.alterar('idInstrutor')}
               erro={form.erros.idInstrutor}
-              opcoes={usuarios.map((u) => ({ valor: u.idUsuario, texto: u.nomeCompleto }))}
+              opcoes={usuarios.map((u) => ({
+                valor: u.idUsuario,
+                texto: u.nomeCompleto,
+              }))}
             />
 
             <CampoSelect
@@ -120,7 +142,10 @@ export function CursoForm() {
               value={form.valores.idCategoria}
               onChange={form.alterar('idCategoria')}
               erro={form.erros.idCategoria}
-              opcoes={categorias.map((c) => ({ valor: c.idCategoria, texto: c.nome }))}
+              opcoes={categorias.map((c) => ({
+                valor: c.idCategoria,
+                texto: c.nome,
+              }))}
             />
           </div>
 
@@ -170,7 +195,9 @@ export function CursoForm() {
             <Botao type="submit" disabled={form.enviando}>
               {form.enviando ? 'Salvando…' : 'Salvar'}
             </Botao>
-            <Botao variante="secundario" onClick={() => navegar('/cursos')}>Cancelar</Botao>
+            <Botao variante="secundario" onClick={() => navegar('/cursos')}>
+              Cancelar
+            </Botao>
           </div>
         </form>
       </Cartao>

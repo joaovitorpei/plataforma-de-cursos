@@ -63,7 +63,10 @@ export function Entrar() {
       <main className="acesso-formulario">
         <div className="acesso-caixa">
           <h1 style={{ fontSize: 'var(--t-xl)' }}>Entrar</h1>
-          <p className="texto-secundario" style={{ marginBottom: 'var(--e-5)' }}>
+          <p
+            className="texto-secundario"
+            style={{ marginBottom: 'var(--e-5)' }}
+          >
             Acesse com a conta cadastrada na plataforma.
           </p>
 
@@ -96,12 +99,20 @@ export function Entrar() {
               required
             />
 
-            <Botao type="submit" tamanho="grande" className="largura-total" disabled={enviando}>
+            <Botao
+              type="submit"
+              tamanho="grande"
+              className="largura-total"
+              disabled={enviando}
+            >
               {enviando ? 'Entrando…' : 'Entrar'}
             </Botao>
           </form>
 
-          <p className="texto-secundario texto-centro" style={{ marginTop: 'var(--e-5)' }}>
+          <p
+            className="texto-secundario texto-centro"
+            style={{ marginTop: 'var(--e-5)' }}
+          >
             Ainda não tem conta? <Link to="/cadastrar">Cadastre-se</Link>
           </p>
         </div>
