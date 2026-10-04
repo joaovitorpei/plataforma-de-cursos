@@ -55,11 +55,15 @@ Depois, cada comando abaixo ocupa um terminal. Deixe aberto.
 | `frontend` | `npm run dev` | http://localhost:5173 | a tela (EduCursos) |
 | `backend` | `npx prisma studio --port 5555` | http://localhost:5555 | visualizador do banco |
 
-Para popular a plataforma com dados de demonstração, com a API no ar:
+Com tudo no ar, o primeiro passo é criar sua conta na tela de cadastro. Lá você
+escolhe o tipo:
 
-```bash
-cd backend && npm run dados-exemplo   # entre com admin@educursos.com / senha123
-```
+| Tipo | O que pode fazer |
+|---|---|
+| **Professor** (ADMIN) | cria, edita e exclui cursos, aulas, categorias, planos; vê todos os usuários |
+| **Aluno** (USER) | vê o catálogo, se matricula, assiste ao que comprou, avalia e paga o que é seu |
+
+Para testar os dois lados, crie uma conta de cada.
 
 `Ctrl+C` derruba o que estiver naquele terminal.
 

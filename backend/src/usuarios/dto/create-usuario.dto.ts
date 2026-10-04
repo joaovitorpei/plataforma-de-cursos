@@ -1,5 +1,14 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  IsEmail,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MinLength,
+} from 'class-validator';
+
+import { Perfil } from '../../generated/prisma/enums';
 
 export class CreateUsuarioDto {
   @ApiProperty({
@@ -25,4 +34,15 @@ export class CreateUsuarioDto {
   @IsString()
   @MinLength(6)
   senha: string;
+
+  @ApiPropertyOptional({
+    enum: Perfil,
+    default: Perfil.USER,
+    description:
+      'Tipo de conta. USER é aluno; ADMIN é professor/administrador, que ' +
+      'mantém o catálogo. Quando não informado, vale USER.',
+  })
+  @IsOptional()
+  @IsEnum(Perfil)
+  perfil?: Perfil;
 }

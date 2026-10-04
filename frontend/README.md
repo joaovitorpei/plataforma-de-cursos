@@ -28,16 +28,15 @@ npm run dev
 | http://localhost:3000/api | Swagger da API |
 | http://localhost:5555 | Prisma Studio (`npx prisma studio --port 5555`) |
 
-### Dados de exemplo
+### Primeiro acesso
 
-Com a API no ar:
+Com o banco vazio não existe conta nenhuma. Clique em **Cadastre-se** e escolha
+o tipo de conta:
 
-```bash
-cd ../backend && npm run dados-exemplo
-```
+- **Professor** — mantém o catálogo: cria cursos, módulos, aulas, categorias e planos
+- **Aluno** — vê o catálogo, se matricula e acompanha o próprio progresso
 
-Cria cursos, módulos, aulas, trilha, matrículas, avaliações, certificado, planos,
-assinatura e pagamento. Depois entre com **admin@educursos.com** / **senha123**.
+Vale criar uma de cada para ver as duas telas. O mesmo e-mail não pode repetir.
 
 ---
 

@@ -31,13 +31,18 @@ export class UsuariosController {
   constructor(private readonly usuariosService: UsuariosService) {}
 
   /**
-   * Cadastro — a única rota pública junto com o login. Quem se cadastra nasce
-   * sempre como USER; o perfil não é escolhido aqui, senão qualquer pessoa
-   * viraria administrador sozinha.
+   * Cadastro — a única rota pública junto com o login.
+   *
+   * A pessoa escolhe aqui se é aluno (USER) ou professor (ADMIN). Foi uma
+   * decisão de projeto: facilita a demonstração e o uso em sala. Vale saber
+   * que, num sistema aberto ao público, essa escolha precisaria de alguma
+   * trava — convite, código de instrutor ou aprovação — senão qualquer pessoa
+   * se promoveria a administrador. A autorização em si continua valendo: um
+   * USER realmente não consegue criar nem apagar nada do catálogo.
    */
   @Publico()
   @Post()
-  @ApiOperation({ summary: 'Cadastrar um novo usuário (sempre como aluno)' })
+  @ApiOperation({ summary: 'Cadastrar um novo usuário (aluno ou professor)' })
   @ApiResponse({ status: 201, description: 'Usuário criado com sucesso.' })
   @ApiResponse({ status: 400, description: 'Dados inválidos.' })
   create(@Body() createUsuarioDto: CreateUsuarioDto) {
