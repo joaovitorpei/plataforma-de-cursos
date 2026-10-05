@@ -16,8 +16,9 @@ import type { CursoEntrada, ICategoria, IUsuario } from '../models';
 import {
   categoriaService,
   cursoService,
-  listarUsuariosVisiveis,
+  listarInstrutores,
 } from '../services';
+import { useAuth } from '../auth/useAuth';
 import { useFormulario } from '../hooks';
 import { dataParaInput } from '../utils/formato';
 import { mensagemDeErro } from '../utils/erro';
@@ -36,6 +37,7 @@ const VAZIO = {
 export function CursoForm() {
   const { id } = useParams();
   const navegar = useNavigate();
+  const { usuario, ehAdmin } = useAuth();
   const editando = Boolean(id);
 
   const [categorias, setCategorias] = useState<ICategoria[]>([]);
@@ -60,10 +62,14 @@ export function CursoForm() {
       try {
         const [listaCategorias, listaUsuarios] = await Promise.all([
           categoriaService.listar(),
-          listarUsuariosVisiveis(),
+          listarInstrutores(),
         ]);
         setCategorias(listaCategorias);
         setUsuarios(listaUsuarios);
+
+        if (!editando && !ehAdmin && usuario) {
+          preencher({ ...VAZIO, idInstrutor: String(usuario.idUsuario) });
+        }
 
         if (editando) {
           const curso = await cursoService.obter(Number(id));
@@ -87,7 +93,7 @@ export function CursoForm() {
       }
     }
     void iniciar();
-  }, [editando, id, preencher]);
+  }, [editando, id, preencher, ehAdmin, usuario]);
 
   if (carregando) return <Carregando />;
 
@@ -124,16 +130,31 @@ export function CursoForm() {
           />
 
           <div className="campos-lado-a-lado">
+            {/*
+              O professor dá aula do que é dele: o campo vem travado no
+              próprio nome. Só o administrador escolhe de quem é o curso — e a
+              API faz a mesma conferência, não confia nesta tela.
+            */}
             <CampoSelect
               rotulo="Instrutor"
               name="idInstrutor"
+              disabled={!ehAdmin}
               value={form.valores.idInstrutor}
               onChange={form.alterar('idInstrutor')}
               erro={form.erros.idInstrutor}
-              opcoes={usuarios.map((u) => ({
-                valor: u.idUsuario,
-                texto: u.nomeCompleto,
-              }))}
+              ajuda={
+                ehAdmin ? undefined : 'Você é o instrutor dos cursos que cria.'
+              }
+              opcoes={
+                ehAdmin
+                  ? usuarios.map((u) => ({
+                      valor: u.idUsuario,
+                      texto: u.nomeCompleto,
+                    }))
+                  : usuario
+                    ? [{ valor: usuario.idUsuario, texto: usuario.nomeCompleto }]
+                    : []
+              }
             />
 
             <CampoSelect

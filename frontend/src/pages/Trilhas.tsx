@@ -30,7 +30,7 @@ async function carregar() {
 }
 
 export function Trilhas() {
-  const { ehAdmin } = useAuth();
+  const { ehEquipe } = useAuth();
   const { dados, erro, carregando, recarregar } = useCarregamento(carregar);
 
   const exclusao = useExclusao<ITrilha>(
@@ -87,7 +87,7 @@ export function Trilhas() {
                         Ver
                       </Botao>
                     </Link>
-                    {ehAdmin ? (
+                    {ehEquipe ? (
                       <>
                         <Link to={`/trilhas/${trilha.idTrilha}/editar`}>
                           <Botao variante="texto" tamanho="pequeno">
@@ -113,7 +113,7 @@ export function Trilhas() {
         <EstadoVazio
           titulo="Nenhuma trilha cadastrada"
           acao={
-            ehAdmin ? (
+            ehEquipe ? (
               <Link to="/trilhas/nova">
                 <Botao>Nova trilha</Botao>
               </Link>

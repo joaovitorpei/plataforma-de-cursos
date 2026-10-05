@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { Link } from 'react-router-dom';
 
 import { useAuth } from '../auth/useAuth';
@@ -15,27 +16,27 @@ import {
 } from '../services';
 import { data, moeda, resumir } from '../utils/formato';
 
-/** Carrega de uma vez os números que resumem a plataforma. */
-async function carregarPainel() {
-  const [
-    cursos,
-    categorias,
-    trilhas,
-    matriculas,
-    avaliacoes,
-    certificados,
-    planos,
-    assinaturas,
-  ] = await Promise.all([
-    cursoService.listar(),
-    categoriaService.listar(),
-    trilhaService.listar(),
-    matriculaService.listar(),
-    avaliacaoService.listar(),
-    certificadoService.listar(),
-    planoService.listar(),
-    assinaturaService.listar(),
-  ]);
+/**
+ * Carrega de uma vez os números que resumem a plataforma.
+ *
+ * O professor não tem acesso ao financeiro — pedir planos e assinaturas para
+ * ele daria 403 e derrubaria o painel inteiro. Por isso essas duas consultas
+ * só saem para quem pode.
+ */
+async function carregarPainel(temFinanceiro: boolean) {
+  const [cursos, categorias, trilhas, matriculas, avaliacoes, certificados] =
+    await Promise.all([
+      cursoService.listar(),
+      categoriaService.listar(),
+      trilhaService.listar(),
+      matriculaService.listar(),
+      avaliacaoService.listar(),
+      certificadoService.listar(),
+    ]);
+
+  const [planos, assinaturas] = temFinanceiro
+    ? await Promise.all([planoService.listar(), assinaturaService.listar()])
+    : [[], []];
 
   return {
     cursos,
@@ -50,8 +51,10 @@ async function carregarPainel() {
 }
 
 export function Inicio() {
-  const { usuario, ehAdmin } = useAuth();
-  const { dados, erro, carregando } = useCarregamento(carregarPainel);
+  const { usuario, ehAdmin, ehEquipe } = useAuth();
+  const { dados, erro, carregando } = useCarregamento(
+    useCallback(() => carregarPainel(!ehEquipe || ehAdmin), [ehEquipe, ehAdmin]),
+  );
 
   const primeiroNome = usuario?.nomeCompleto.split(' ')[0] ?? '';
 

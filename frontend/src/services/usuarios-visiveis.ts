@@ -1,32 +1,69 @@
-import type { IUsuario } from '../models';
+import type { IUsuario, Perfil } from '../models';
+import { requisitar } from './http';
 import { usuarioService } from './recursos';
 import { lerConteudo, lerToken } from './token';
 
 /**
- * A lista de usuários que esta pessoa pode ver.
+ * As listas de usuários que alimentam os seletores das telas.
  *
- * `GET /usuarios` é restrito a professores — um aluno leva 403. Mas as telas
- * precisam de nomes para mostrar ("Ana Souza" em vez de "usuário 3"), e o
- * aluno só enxerga registros dele mesmo. Então:
+ * Duas regras moram aqui:
  *
- *   professor -> a lista completa
- *   aluno     -> só ele mesmo
+ * 1. **Quem pode ver quem.** `GET /usuarios` é da equipe (professor e dono).
+ *    O aluno leva 403 — então, para ele, a lista é só ele mesmo. Isso é o que
+ *    faz o campo "Aluno" de um estudante vir com uma opção só, que é
+ *    exatamente o que a API permitiria.
  *
- * O perfil sai do próprio token, sem consultar a API — assim nem chegamos a
- * fazer a requisição que daria 403.
- *
- * Efeito colateral bem-vindo: nos formulários, o campo "Aluno" de um estudante
- * vem com uma opção só, a dele. É exatamente o que a API permitiria mesmo.
+ * 2. **Qual perfil cabe em cada campo.** Um curso é dado por um professor, uma
+ *    matrícula é de um aluno. Pedir a lista certa evita oferecer escolha que a
+ *    API recusaria — ou pior, que ela aceitaria sem fazer sentido.
  */
-export async function listarUsuariosVisiveis(): Promise<IUsuario[]> {
+
+/** Quem está logado é da equipe? Sai do próprio token, sem ir à API. */
+function souDaEquipe(): boolean {
+  const token = lerToken();
+  const perfil = token ? lerConteudo(token)?.perfil : undefined;
+  return perfil === 'ADMIN' || perfil === 'INSTRUTOR';
+}
+
+async function soEuMesmo(): Promise<IUsuario[]> {
   const token = lerToken();
   const conteudo = token ? lerConteudo(token) : null;
   if (!conteudo) return [];
 
-  if (conteudo.perfil === 'ADMIN') {
-    return usuarioService.listar();
-  }
+  return [await usuarioService.obter(conteudo.sub)];
+}
 
-  const eu = await usuarioService.obter(conteudo.sub);
-  return [eu];
+/** Todos os usuários que esta pessoa pode enxergar. */
+export async function listarUsuariosVisiveis(): Promise<IUsuario[]> {
+  return souDaEquipe() ? usuarioService.listar() : soEuMesmo();
+}
+
+/** Só as contas de um perfil. O aluno continua vendo apenas a si mesmo. */
+async function listarPorPerfil(perfil: Perfil): Promise<IUsuario[]> {
+  if (!souDaEquipe()) return soEuMesmo();
+  return requisitar<IUsuario[]>(`/usuarios?perfil=${perfil}`);
+}
+
+/** Para os campos "Aluno": matrícula, avaliação, progresso, certificado. */
+export function listarAlunos(): Promise<IUsuario[]> {
+  return listarPorPerfil('USER');
+}
+
+/**
+ * Para o campo "Instrutor" do curso.
+ *
+ * Traz professores **e** administradores: o dono da plataforma também pode
+ * dar aula, e sem isso ele não conseguiria se colocar como instrutor.
+ */
+export async function listarInstrutores(): Promise<IUsuario[]> {
+  if (!souDaEquipe()) return soEuMesmo();
+
+  const [professores, donos] = await Promise.all([
+    requisitar<IUsuario[]>('/usuarios?perfil=INSTRUTOR'),
+    requisitar<IUsuario[]>('/usuarios?perfil=ADMIN'),
+  ]);
+
+  return [...professores, ...donos].sort((a, b) =>
+    a.nomeCompleto.localeCompare(b.nomeCompleto),
+  );
 }

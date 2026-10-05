@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 import { RotaAdmin } from '../auth/RotaAdmin';
+import { RotaEquipe } from '../auth/RotaEquipe';
 import { RotaProtegida } from '../auth/RotaProtegida';
 import { Layout } from '../components/layout';
 import {
@@ -97,16 +98,13 @@ export function Rotas() {
             <Route path="/pagamentos/novo" element={<PagamentoForm />} />
             <Route path="/pagamentos/:id/editar" element={<PagamentoForm />} />
 
-            {/* Manutenção do catálogo e dos usuários: só professor */}
-            <Route element={<RotaAdmin />}>
-              <Route path="/usuarios" element={<Usuarios />} />
-              <Route path="/usuarios/novo" element={<UsuarioForm />} />
-              <Route path="/usuarios/:id/editar" element={<UsuarioForm />} />
+            {/* Catálogo e conteúdo: professor e dono */}
+            <Route element={<RotaEquipe />}>
               <Route path="/categorias" element={<Categorias />} />
               <Route path="/categorias/nova" element={<CategoriaForm />} />
               <Route
-                path="/categorias/:id/editar"
-                element={<CategoriaForm />}
+              path="/categorias/:id/editar"
+              element={<CategoriaForm />}
               />
               <Route path="/cursos/novo" element={<CursoForm />} />
               <Route path="/cursos/:id/editar" element={<CursoForm />} />
@@ -120,9 +118,16 @@ export function Rotas() {
               <Route path="/trilhas/:id/editar" element={<TrilhaForm />} />
               <Route path="/certificados/novo" element={<CertificadoForm />} />
               <Route
-                path="/certificados/:id/editar"
-                element={<CertificadoForm />}
+              path="/certificados/:id/editar"
+              element={<CertificadoForm />}
               />
+            </Route>
+
+            {/* Contas da equipe e financeiro: só o dono */}
+            <Route element={<RotaAdmin />}>
+              <Route path="/usuarios" element={<Usuarios />} />
+              <Route path="/usuarios/novo" element={<UsuarioForm />} />
+              <Route path="/usuarios/:id/editar" element={<UsuarioForm />} />
               <Route path="/planos/novo" element={<PlanoForm />} />
               <Route path="/planos/:id/editar" element={<PlanoForm />} />
             </Route>

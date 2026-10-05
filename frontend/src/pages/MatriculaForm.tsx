@@ -15,7 +15,7 @@ import type { ICurso, IUsuario, MatriculaEntrada } from '../models';
 import {
   cursoService,
   matriculaService,
-  listarUsuariosVisiveis,
+  listarAlunos,
 } from '../services';
 import { useFormulario } from '../hooks';
 import { dataParaInput } from '../utils/formato';
@@ -51,7 +51,7 @@ export function MatriculaForm() {
     async function iniciar() {
       try {
         const [listaUsuarios, listaCursos] = await Promise.all([
-          listarUsuariosVisiveis(),
+          listarAlunos(),
           cursoService.listar(),
         ]);
         setUsuarios(listaUsuarios);
@@ -119,7 +119,7 @@ export function MatriculaForm() {
             value={form.valores.dataConclusao}
             onChange={form.alterar('dataConclusao')}
             erro={form.erros.dataConclusao}
-            ajuda="Deixe em branco enquanto o aluno não concluir o curso."
+ajuda="Em branco = em andamento. Data futura = conclusão prevista." 
           />
 
           <div className="linha">

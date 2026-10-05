@@ -59,3 +59,15 @@ export function resumir(texto?: string | null, limite = 120): string {
     ? texto
     : `${texto.slice(0, limite).trimEnd()}…`;
 }
+
+/**
+ * A data já passou (ou é hoje)?
+ *
+ * Usado pela situação da matrícula: uma data de conclusão marcada para o
+ * futuro não significa curso terminado. Comparação por texto, ambos em
+ * AAAA-MM-DD — assim não há surpresa de fuso horário.
+ */
+export function jaAconteceu(iso?: string | null): boolean {
+  if (!iso) return false;
+  return iso.slice(0, 10) <= new Date().toISOString().slice(0, 10);
+}

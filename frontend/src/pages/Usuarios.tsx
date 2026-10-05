@@ -9,10 +9,12 @@ import {
   Carregando,
   ConfirmarExclusao,
   EstadoVazio,
+  Selo,
   Tabela,
 } from '../components/ui';
 import type { Coluna } from '../components/ui';
 import { usuarioService } from '../services';
+import { ROTULO_PERFIL } from '../models';
 import type { IUsuario } from '../models';
 import { data, iniciais } from '../utils/formato';
 import { useAuth } from '../auth/useAuth';
@@ -47,6 +49,14 @@ export function Usuarios() {
     {
       cabecalho: '#',
       celula: (u) => <span className="mono">{u.idUsuario}</span>,
+    },
+    {
+      cabecalho: 'Tipo',
+      celula: (u) => (
+        <Selo cor={u.perfil === 'ADMIN' ? 'marca' : 'neutro'}>
+          {ROTULO_PERFIL[u.perfil]}
+        </Selo>
+      ),
     },
     { cabecalho: 'Cadastro', celula: (u) => data(u.dataCadastro) },
     {

@@ -3,38 +3,14 @@ import { Link, Navigate, useNavigate } from 'react-router-dom';
 
 import { useAuth } from '../auth/useAuth';
 import { Alerta, Botao, CampoTexto } from '../components/ui';
+import { MarcaVitrine } from '../components/layout';
 import { usuarioSchema } from '../models';
-import type { Perfil } from '../models';
 import { mensagemDeErro } from '../utils/erro';
-
-/** As duas portas de entrada da plataforma. */
-const TIPOS: {
-  valor: Perfil;
-  titulo: string;
-  descricao: string;
-  icone: string;
-}[] = [
-  {
-    valor: 'USER',
-    titulo: 'Sou aluno',
-    descricao:
-      'Quero estudar: ver o catálogo, me matricular e acompanhar meu progresso.',
-    icone: 'bi-mortarboard',
-  },
-  {
-    valor: 'ADMIN',
-    titulo: 'Sou professor',
-    descricao:
-      'Quero ensinar: criar cursos, módulos e aulas, e gerenciar a plataforma.',
-    icone: 'bi-easel',
-  },
-];
 
 export function Cadastrar() {
   const { cadastrar, autenticado, carregando } = useAuth();
   const navegar = useNavigate();
 
-  const [perfil, setPerfil] = useState<Perfil>('USER');
   const [valores, setValores] = useState({
     nomeCompleto: '',
     email: '',
@@ -57,7 +33,7 @@ export function Cadastrar() {
     evento.preventDefault();
     setErroGeral(null);
 
-    const resultado = usuarioSchema.safeParse({ ...valores, perfil });
+    const resultado = usuarioSchema.safeParse(valores);
     if (!resultado.success) {
       const encontrados: Record<string, string> = {};
       for (const problema of resultado.error.issues) {
@@ -70,12 +46,7 @@ export function Cadastrar() {
 
     setEnviando(true);
     try {
-      await cadastrar(
-        valores.nomeCompleto,
-        valores.email,
-        valores.senha,
-        perfil,
-      );
+      await cadastrar(valores.nomeCompleto, valores.email, valores.senha);
       navegar('/', { replace: true });
     } catch (excecao) {
       setErroGeral(mensagemDeErro(excecao));
@@ -87,14 +58,8 @@ export function Cadastrar() {
   return (
     <div className="acesso">
       <aside className="acesso-vitrine">
-        <p className="marca" style={{ color: '#fff', fontSize: '1.4rem' }}>
-          Edu<span style={{ color: '#7fc4bb' }}>Cursos</span>
-        </p>
+        <MarcaVitrine />
         <h2>Comece agora</h2>
-        <p>
-          Uma conta para quem estuda e outra para quem ensina. Escolha a sua ao
-          lado — dá para ter as duas, com e-mails diferentes.
-        </p>
       </aside>
 
       <main className="acesso-formulario">
@@ -109,46 +74,13 @@ export function Cadastrar() {
               </div>
             ) : null}
 
-            {/* Escolha do tipo de conta: é ela que define o que a pessoa poderá fazer */}
-            <fieldset className="mb-3">
-              <legend className="form-label">Tipo de conta</legend>
-
-              <div className="vstack gap-2">
-                {TIPOS.map((tipo) => (
-                  <label
-                    key={tipo.valor}
-                    className={`card p-3 mb-0 ${
-                      perfil === tipo.valor
-                        ? 'border-primary bg-primary-subtle'
-                        : ''
-                    }`}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <div className="d-flex align-items-start gap-2">
-                      <input
-                        type="radio"
-                        name="perfil"
-                        className="form-check-input mt-1 flex-shrink-0"
-                        checked={perfil === tipo.valor}
-                        onChange={() => setPerfil(tipo.valor)}
-                      />
-                      <div>
-                        <span className="fw-semibold d-block">
-                          <i
-                            className={`bi ${tipo.icone} me-1`}
-                            aria-hidden="true"
-                          />
-                          {tipo.titulo}
-                        </span>
-                        <span className="small text-body-secondary">
-                          {tipo.descricao}
-                        </span>
-                      </div>
-                    </div>
-                  </label>
-                ))}
-              </div>
-            </fieldset>
+            <div className="alert alert-info d-flex gap-2 mb-3">
+              <i className="bi bi-mortarboard flex-shrink-0" aria-hidden="true" />
+              <span className="small">
+                Você está criando uma <strong>conta de aluno</strong>. Contas de
+                professor são criadas pelo administrador da plataforma.
+              </span>
+            </div>
 
             <CampoTexto
               rotulo="Nome completo"

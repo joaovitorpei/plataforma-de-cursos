@@ -29,7 +29,7 @@ export function limparToken(): void {
 export interface ConteudoToken {
   sub: number;
   email: string;
-  perfil: 'USER' | 'ADMIN';
+  perfil: 'USER' | 'INSTRUTOR' | 'ADMIN';
   exp?: number;
 }
 

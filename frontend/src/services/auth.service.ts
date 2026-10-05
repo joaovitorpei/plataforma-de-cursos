@@ -1,5 +1,5 @@
 import { requisitar } from './http';
-import type { IUsuario, Perfil } from '../models';
+import type { IUsuario } from '../models';
 
 export interface RespostaLogin {
   access_token: string;
@@ -17,15 +17,19 @@ export function entrar(email: string, senha: string): Promise<RespostaLogin> {
  * POST /usuarios — também é público, é a rota de cadastro.
  * A API devolve o usuário criado já sem a senha.
  */
+/**
+ * POST /auth/cadastrar — rota pública. Cria sempre uma conta de **aluno**:
+ * o perfil nem é enviado, quem fixa é o backend. Contas de professor e de
+ * administrador são criadas pelo admin, em POST /usuarios.
+ */
 export function cadastrar(
   nomeCompleto: string,
   email: string,
   senha: string,
-  perfil: Perfil,
 ): Promise<IUsuario> {
-  return requisitar<IUsuario>('/usuarios', {
+  return requisitar<IUsuario>('/auth/cadastrar', {
     method: 'POST',
-    body: JSON.stringify({ nomeCompleto, email, senha, perfil }),
+    body: JSON.stringify({ nomeCompleto, email, senha }),
   });
 }
 

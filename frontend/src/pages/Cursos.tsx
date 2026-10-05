@@ -27,7 +27,7 @@ async function carregar() {
 }
 
 export function Cursos() {
-  const { ehAdmin } = useAuth();
+  const { ehEquipe } = useAuth();
   const { dados, erro, carregando, recarregar } = useCarregamento(carregar);
   const [filtroCategoria, setFiltroCategoria] = useState('');
 
@@ -57,7 +57,7 @@ export function Cursos() {
         titulo="Cursos"
         descricao="O catálogo da plataforma."
         acao={
-          ehAdmin ? (
+          ehEquipe ? (
             <Link to="/cursos/novo">
               <Botao>Novo curso</Botao>
             </Link>
@@ -123,7 +123,7 @@ export function Cursos() {
                           Ver
                         </Botao>
                       </Link>
-                      {ehAdmin ? (
+                      {ehEquipe ? (
                         <>
                           <Link to={`/cursos/${curso.idCurso}/editar`}>
                             <Botao variante="texto" tamanho="pequeno">
@@ -157,7 +157,7 @@ export function Cursos() {
                   : 'Cadastre o primeiro curso do catálogo.'
               }
               acao={
-                ehAdmin ? (
+                ehEquipe ? (
                   <Link to="/cursos/novo">
                     <Botao>Novo curso</Botao>
                   </Link>

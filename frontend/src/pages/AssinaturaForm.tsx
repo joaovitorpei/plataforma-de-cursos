@@ -15,7 +15,7 @@ import type { AssinaturaEntrada, IPlano, IUsuario } from '../models';
 import {
   assinaturaService,
   planoService,
-  listarUsuariosVisiveis,
+  listarAlunos,
 } from '../services';
 import { useFormulario } from '../hooks';
 import { dataParaInput, hoje, moeda } from '../utils/formato';
@@ -51,7 +51,7 @@ export function AssinaturaForm() {
     async function iniciar() {
       try {
         const [listaUsuarios, listaPlanos] = await Promise.all([
-          listarUsuariosVisiveis(),
+          listarAlunos(),
           planoService.listar(),
         ]);
         setUsuarios(listaUsuarios);

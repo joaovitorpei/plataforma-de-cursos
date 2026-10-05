@@ -16,7 +16,7 @@ import {
   certificadoService,
   cursoService,
   trilhaService,
-  listarUsuariosVisiveis,
+  listarAlunos,
 } from '../services';
 import { useFormulario } from '../hooks';
 import { mensagemDeErro } from '../utils/erro';
@@ -64,7 +64,7 @@ export function CertificadoForm() {
     async function iniciar() {
       try {
         const [listaUsuarios, listaCursos, listaTrilhas] = await Promise.all([
-          listarUsuariosVisiveis(),
+          listarAlunos(),
           cursoService.listar(),
           trilhaService.listar(),
         ]);

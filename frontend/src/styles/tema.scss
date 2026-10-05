@@ -209,14 +209,34 @@ body { -webkit-font-smoothing: antialiased; }
   padding: 4rem 3rem;
   display: flex;
   flex-direction: column;
+  align-items: center;      // o símbolo manda no alinhamento agora
   justify-content: center;
+  text-align: center;
+  gap: 1.5rem;
 
-  h2 { color: #fff; max-width: 22ch; }
-  p  { color: #c5ded9; max-width: 42ch; }
+  h2 {
+    color: #fff;
+    max-width: 18ch;
+    margin: 0;
+  }
+}
 
-  li { color: #d9ebe8; }
+/** O capelo com o nome logo abaixo. */
+.vitrine-marca {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
 
-  .acesso-marcador { color: #7fc4bb; font-weight: 700; }
+  svg { opacity: 0.95; }
+
+  .vitrine-nome {
+    color: #fff;
+    font-size: 1.6rem;
+    margin: 0;
+
+    span { color: #7fc4bb; }
+  }
 }
 
 .acesso-formulario {
@@ -230,8 +250,15 @@ body { -webkit-font-smoothing: antialiased; }
 
 @media (max-width: 860px) {
   .acesso { grid-template-columns: 1fr; }
-  .acesso-vitrine { padding: 2rem 1.5rem; }
-  .acesso-lista { display: none; }
+
+  .acesso-vitrine {
+    padding: 2rem 1.5rem;
+    gap: 1rem;
+  }
+
+  // Numa tela estreita o capelo grande rouba espaço do formulário.
+  .vitrine-marca svg { width: 56px; height: 56px; }
+  .acesso-vitrine h2 { font-size: 1.25rem; }
 }
 
 // ---------------- estrelas ----------------
@@ -373,16 +400,6 @@ body { -webkit-font-smoothing: antialiased; }
   font-size: 0.8125rem;
   color: var(--bs-tertiary-color);
   margin-top: $spacer * 0.25;
-}
-
-.acesso-lista {
-  list-style: none;
-  padding: 0;
-  margin-top: $spacer;
-  display: grid;
-  gap: $spacer * 0.75;
-
-  li { display: flex; gap: $spacer * 0.75; align-items: flex-start; }
 }
 
 .certificado-titulo {

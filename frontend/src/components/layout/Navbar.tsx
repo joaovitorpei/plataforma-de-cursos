@@ -6,6 +6,7 @@ import type { ItemMenu } from './MenuSuspenso';
 import { useAuth } from '../../auth/useAuth';
 import { Botao } from '../ui/Botao';
 import { Selo } from '../ui/Selo';
+import { ROTULO_PERFIL } from '../../models';
 import { iniciais } from '../../utils/formato';
 
 /**
@@ -53,14 +54,24 @@ const MEUS_ESTUDOS: Secao = {
   ],
 };
 
-const ALUNOS_ADMIN: Secao = {
+const ALUNOS_EQUIPE: Secao = {
   titulo: 'Alunos',
   itens: [
-    { para: '/usuarios', texto: 'Usuários' },
     { para: '/matriculas', texto: 'Matrículas' },
     { para: '/progresso', texto: 'Progresso' },
     { para: '/avaliacoes', texto: 'Avaliações' },
     { para: '/certificados', texto: 'Certificados' },
+  ],
+};
+
+/** Só o dono: contas da equipe e tudo o que envolve dinheiro. */
+const GESTAO_ADMIN: Secao = {
+  titulo: 'Gestão',
+  itens: [
+    { para: '/usuarios', texto: 'Usuários' },
+    { para: '/planos', texto: 'Planos' },
+    { para: '/assinaturas', texto: 'Assinaturas' },
+    { para: '/pagamentos', texto: 'Pagamentos' },
   ],
 };
 
@@ -73,23 +84,18 @@ const FINANCEIRO_ALUNO: Secao = {
   ],
 };
 
-const FINANCEIRO_ADMIN: Secao = {
-  titulo: 'Financeiro',
-  itens: [
-    { para: '/planos', texto: 'Planos' },
-    { para: '/assinaturas', texto: 'Assinaturas' },
-    { para: '/pagamentos', texto: 'Pagamentos' },
-  ],
-};
-
 export function Navbar() {
-  const { usuario, ehAdmin, sair } = useAuth();
+  const { usuario, ehAdmin, ehEquipe, sair } = useAuth();
   const navegar = useNavigate();
   const [aberta, setAberta] = useState(false);
 
+  // Três menus diferentes. Esconder item não é segurança — a API é quem
+  // barra — mas evita oferecer uma tela que só daria 403.
   const secoes: Secao[] = ehAdmin
-    ? [CATALOGO_ADMIN, CONTEUDO_ADMIN, ALUNOS_ADMIN, FINANCEIRO_ADMIN]
-    : [CATALOGO_ALUNO, MEUS_ESTUDOS, FINANCEIRO_ALUNO];
+    ? [CATALOGO_ADMIN, CONTEUDO_ADMIN, ALUNOS_EQUIPE, GESTAO_ADMIN]
+    : ehEquipe
+      ? [CATALOGO_ADMIN, CONTEUDO_ADMIN, ALUNOS_EQUIPE]
+      : [CATALOGO_ALUNO, MEUS_ESTUDOS, FINANCEIRO_ALUNO];
 
   function aoSair() {
     sair();
@@ -148,8 +154,8 @@ export function Navbar() {
               <strong className="d-block">
                 {usuario?.nomeCompleto ?? 'Visitante'}
               </strong>
-              <Selo cor={ehAdmin ? 'marca' : 'neutro'}>
-                {ehAdmin ? 'Professor' : 'Aluno'}
+              <Selo cor={ehAdmin ? 'destaque' : ehEquipe ? 'marca' : 'neutro'}>
+                {usuario ? ROTULO_PERFIL[usuario.perfil] : 'Visitante'}
               </Selo>
             </span>
             <Botao variante="secundario" tamanho="pequeno" onClick={aoSair}>

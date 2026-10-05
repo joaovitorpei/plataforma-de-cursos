@@ -18,7 +18,7 @@ import {
   listarUsuariosVisiveis,
 } from '../services';
 import type { IMatricula } from '../models';
-import { data } from '../utils/formato';
+import { data, jaAconteceu } from '../utils/formato';
 
 async function carregar() {
   const [matriculas, usuarios, cursos] = await Promise.all([
@@ -64,12 +64,25 @@ export function Matriculas() {
     { cabecalho: 'Matrícula', celula: (m) => data(m.dataMatricula) },
     {
       cabecalho: 'Situação',
-      celula: (m) =>
-        m.dataConclusao ? (
+      /*
+       * Três estados, e a diferença entre os dois últimos importa:
+       *
+       *   sem data      -> Em andamento
+       *   data no futuro-> Conclusão prevista (ainda não terminou!)
+       *   data que já passou -> Concluído
+       *
+       * Antes, qualquer data preenchida dizia "Concluído" — e um curso com
+       * término marcado para 2027 aparecia como terminado.
+       */
+      celula: (m) => {
+        if (!m.dataConclusao) return <Selo cor="aviso">Em andamento</Selo>;
+
+        return jaAconteceu(m.dataConclusao) ? (
           <Selo cor="ok">Concluído em {data(m.dataConclusao)}</Selo>
         ) : (
-          <Selo cor="aviso">Em andamento</Selo>
-        ),
+          <Selo cor="marca">Previsto para {data(m.dataConclusao)}</Selo>
+        );
+      },
     },
     {
       cabecalho: 'Ações',

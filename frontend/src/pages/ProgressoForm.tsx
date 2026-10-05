@@ -15,7 +15,7 @@ import type { IAula, IUsuario, ProgressoEntrada } from '../models';
 import {
   aulaService,
   progressoService,
-  listarUsuariosVisiveis,
+  listarAlunos,
 } from '../services';
 import { useFormulario } from '../hooks';
 import { dataParaInput, hoje } from '../utils/formato';
@@ -63,7 +63,7 @@ export function ProgressoForm() {
     async function iniciar() {
       try {
         const [listaUsuarios, listaAulas] = await Promise.all([
-          listarUsuariosVisiveis(),
+          listarAlunos(),
           aulaService.listar(),
         ]);
         setUsuarios(listaUsuarios);

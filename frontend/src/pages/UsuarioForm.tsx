@@ -5,11 +5,12 @@ import {
   Alerta,
   Botao,
   CabecalhoPagina,
+  CampoSelect,
   CampoTexto,
   Carregando,
   Cartao,
 } from '../components/ui';
-import { usuarioEdicaoSchema, usuarioSchema } from '../models';
+import { PERFIS, ROTULO_PERFIL, usuarioEdicaoSchema, usuarioSchema } from '../models';
 import type { UsuarioEntrada } from '../models';
 import { usuarioService } from '../services';
 import { useFormulario } from '../hooks';
@@ -38,7 +39,7 @@ export function UsuarioForm() {
   );
 
   const form = useFormulario(
-    { nomeCompleto: '', email: '', senha: '' },
+    { nomeCompleto: '', email: '', senha: '', perfil: 'USER' },
     editando ? usuarioEdicaoSchema : usuarioSchema,
     enviar,
   );
@@ -53,6 +54,7 @@ export function UsuarioForm() {
           nomeCompleto: usuario.nomeCompleto,
           email: usuario.email,
           senha: '',
+          perfil: usuario.perfil,
         }),
       )
       .catch((excecao) => setErroCarga(mensagemDeErro(excecao)))
@@ -106,6 +108,17 @@ export function UsuarioForm() {
                 ? 'Deixe em branco para manter a senha atual.'
                 : 'Mínimo de 6 caracteres.'
             }
+          />
+
+          <CampoSelect
+            rotulo="Tipo de conta"
+            name="perfil"
+            vazio=""
+            value={form.valores.perfil}
+            onChange={form.alterar('perfil')}
+            erro={form.erros.perfil}
+            opcoes={PERFIS.map((p) => ({ valor: p, texto: ROTULO_PERFIL[p] }))}
+            ajuda="Professor mantém o catálogo; aluno estuda. Só administradores podem alterar."
           />
 
           <div className="linha">

@@ -12,12 +12,15 @@ import {
   EstadoVazio,
   Estrelas,
   Selo,
+  BarraProgresso,
 } from '../components/ui';
 import {
   aulaService,
   avaliacaoService,
   categoriaService,
   cursoService,
+  consultarElegibilidade,
+  emitirMeuCertificado,
   matriculaService,
   moduloService,
   listarUsuariosVisiveis,
@@ -28,10 +31,11 @@ import { mensagemDeErro } from '../utils/erro';
 export function CursoDetalhe() {
   const { id } = useParams();
   const idCurso = Number(id);
-  const { usuario, ehAdmin } = useAuth();
+  const { usuario, ehEquipe } = useAuth();
 
   const [matriculando, setMatriculando] = useState(false);
   const [erroMatricula, setErroMatricula] = useState<string | null>(null);
+  const [emitindo, setEmitindo] = useState(false);
 
   const carregar = useCallback(async () => {
     const [curso, modulos, aulas, avaliacoes, categorias, matriculas] =
@@ -44,8 +48,12 @@ export function CursoDetalhe() {
         matriculaService.listar(),
       ]);
 
+    const matriculado = matriculas.some(
+      (m) => m.idCurso === idCurso && m.idUsuario === usuario?.idUsuario,
+    );
+
     // A lista de usuários é restrita a professores; o aluno não precisa dela.
-    const usuarios = ehAdmin ? await listarUsuariosVisiveis() : [];
+    const usuarios = ehEquipe ? await listarUsuariosVisiveis() : [];
 
     const modulosDoCurso = modulos
       .filter((modulo) => modulo.idCurso === idCurso)
@@ -62,11 +70,14 @@ export function CursoDetalhe() {
         .filter((aula) => idsModulos.has(aula.idModulo))
         .sort((a, b) => a.ordem - b.ordem),
       avaliacoes: avaliacoes.filter((a) => a.idCurso === idCurso),
-      matriculado: matriculas.some(
-        (m) => m.idCurso === idCurso && m.idUsuario === usuario?.idUsuario,
-      ),
+      matriculado,
+      // Só o aluno matriculado precisa disso; a equipe não emite para si.
+      elegibilidade:
+        !ehEquipe && matriculado
+          ? await consultarElegibilidade(idCurso)
+          : null,
     };
-  }, [idCurso, ehAdmin, usuario?.idUsuario]);
+  }, [idCurso, ehEquipe, usuario?.idUsuario]);
 
   const { dados, erro, carregando, recarregar } = useCarregamento(carregar);
 
@@ -87,6 +98,20 @@ export function CursoDetalhe() {
     }
   }
 
+  async function emitir() {
+    if (!usuario) return;
+    setErroMatricula(null);
+    setEmitindo(true);
+    try {
+      await emitirMeuCertificado(usuario.idUsuario, idCurso);
+      await recarregar();
+    } catch (excecao) {
+      setErroMatricula(mensagemDeErro(excecao));
+    } finally {
+      setEmitindo(false);
+    }
+  }
+
   if (carregando) return <Carregando />;
   if (erro) return <Alerta tipo="erro">{erro}</Alerta>;
   if (!dados?.curso) return <EstadoVazio titulo="Curso não encontrado" />;
@@ -99,6 +124,7 @@ export function CursoDetalhe() {
     categorias,
     usuarios,
     matriculado,
+    elegibilidade,
   } = dados;
 
   const categoria = categorias.find((c) => c.idCategoria === curso.idCategoria);
@@ -117,7 +143,7 @@ export function CursoDetalhe() {
             <Link to="/cursos">
               <Botao variante="secundario">Voltar</Botao>
             </Link>
-            {ehAdmin ? (
+            {ehEquipe ? (
               <Link to={`/cursos/${curso.idCurso}/editar`}>
                 <Botao>Editar</Botao>
               </Link>
@@ -136,7 +162,7 @@ export function CursoDetalhe() {
       </div>
 
       {/* Faixa de matrícula — só para aluno */}
-      {!ehAdmin ? (
+      {!ehEquipe ? (
         <Cartao className={matriculado ? 'border-success' : 'border-primary'}>
           {erroMatricula ? (
             <div className="mb-3">
@@ -180,13 +206,55 @@ export function CursoDetalhe() {
               </Botao>
             )}
           </div>
+
+          {/* Certificado: aparece quando o aluno termina todas as aulas */}
+          {matriculado && elegibilidade ? (
+            <div className="border-top mt-3 pt-3">
+              {elegibilidade.jaEmitido ? (
+                <div className="linha-entre">
+                  <span>
+                    <i className="bi bi-patch-check-fill text-success me-1" />
+                    Você já tem o certificado deste curso.
+                  </span>
+                  <Link to="/certificados">
+                    <Botao variante="secundario" tamanho="pequeno">
+                      Ver certificados
+                    </Botao>
+                  </Link>
+                </div>
+              ) : elegibilidade.concluiu ? (
+                <div className="linha-entre">
+                  <span>
+                    <i className="bi bi-trophy-fill text-warning me-1" />
+                    <strong>Curso concluído!</strong> Você já pode emitir o seu
+                    certificado.
+                  </span>
+                  <Botao onClick={() => void emitir()} disabled={emitindo}>
+                    {emitindo ? 'Emitindo…' : 'Emitir certificado'}
+                  </Botao>
+                </div>
+              ) : (
+                <div>
+                  <BarraProgresso
+                    valor={elegibilidade.aulasConcluidas}
+                    total={elegibilidade.totalAulas}
+                    rotulo="Aulas concluídas"
+                  />
+                  <p className="texto-terciario mb-0 mt-2">
+                    Conclua todas as aulas em <strong>Meu progresso</strong>{' '}
+                    para liberar o certificado.
+                  </p>
+                </div>
+              )}
+            </div>
+          ) : null}
         </Cartao>
       ) : null}
 
       <section>
         <div className="linha-entre mb-3">
           <h2>Conteúdo</h2>
-          {ehAdmin ? (
+          {ehEquipe ? (
             <div className="linha">
               <Link to="/modulos/novo">
                 <Botao variante="secundario" tamanho="pequeno">
@@ -299,12 +367,12 @@ export function CursoDetalhe() {
         {avaliacoes.length === 0 ? (
           <EstadoVazio
             titulo={
-              ehAdmin
+              ehEquipe
                 ? 'Este curso ainda não foi avaliado'
                 : 'Você ainda não avaliou este curso'
             }
             descricao={
-              ehAdmin
+              ehEquipe
                 ? undefined
                 : 'Só é possível ver as avaliações que você escreveu.'
             }

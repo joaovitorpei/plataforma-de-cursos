@@ -15,7 +15,7 @@ import type { AvaliacaoEntrada, ICurso, IUsuario } from '../models';
 import {
   avaliacaoService,
   cursoService,
-  listarUsuariosVisiveis,
+  listarAlunos,
 } from '../services';
 import { useFormulario } from '../hooks';
 import { mensagemDeErro } from '../utils/erro';
@@ -58,7 +58,7 @@ export function AvaliacaoForm() {
     async function iniciar() {
       try {
         const [listaUsuarios, listaCursos] = await Promise.all([
-          listarUsuariosVisiveis(),
+          listarAlunos(),
           cursoService.listar(),
         ]);
         setUsuarios(listaUsuarios);
