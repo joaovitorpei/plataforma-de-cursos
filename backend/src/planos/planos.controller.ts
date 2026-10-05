@@ -21,6 +21,7 @@ import { Perfil } from '../generated/prisma/enums';
 
 @ApiTags('planos')
 @ApiBearerAuth('token')
+@Perfis(Perfil.USER, Perfil.ADMIN)
 @Controller('planos')
 export class PlanosController {
   constructor(private readonly planosService: PlanosService) {}

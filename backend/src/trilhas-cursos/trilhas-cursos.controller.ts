@@ -25,7 +25,7 @@ import { Perfil } from '../generated/prisma/enums';
 export class TrilhasCursosController {
   constructor(private readonly trilhasCursosService: TrilhasCursosService) {}
 
-  @Perfis(Perfil.ADMIN)
+  @Perfis(Perfil.ADMIN, Perfil.INSTRUTOR)
   @Post()
   @ApiOperation({ summary: 'Adicionar um curso a uma trilha' })
   @ApiResponse({ status: 201, description: 'Curso adicionado com sucesso.' })
@@ -50,7 +50,7 @@ export class TrilhasCursosController {
     return this.trilhasCursosService.findOne(+idTrilha, +idCurso);
   }
 
-  @Perfis(Perfil.ADMIN)
+  @Perfis(Perfil.ADMIN, Perfil.INSTRUTOR)
   @Patch(':idTrilha/:idCurso')
   @ApiOperation({ summary: 'Atualizar a ordem de um curso na trilha' })
   update(
@@ -65,7 +65,7 @@ export class TrilhasCursosController {
     );
   }
 
-  @Perfis(Perfil.ADMIN)
+  @Perfis(Perfil.ADMIN, Perfil.INSTRUTOR)
   @Delete(':idTrilha/:idCurso')
   @ApiOperation({ summary: 'Remover um curso de uma trilha' })
   remove(

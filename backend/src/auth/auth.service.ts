@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { Perfil } from '../generated/prisma/enums';
 import { UsuariosService } from '../usuarios/usuarios.service';
+import { CadastroDto } from './dto/cadastro.dto';
 import { LoginDto } from './dto/login.dto';
 
 export interface JwtPayload {
@@ -41,5 +42,13 @@ export class AuthService {
     };
 
     return { access_token: this.jwtService.sign(payload) };
+  }
+
+  /** Cadastro público: o perfil é fixado em USER aqui, não vem do corpo. */
+  cadastrar(cadastroDto: CadastroDto) {
+    return this.usuariosService.create({
+      ...cadastroDto,
+      perfil: Perfil.USER,
+    });
   }
 }

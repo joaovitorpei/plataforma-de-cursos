@@ -87,6 +87,19 @@ export class PrismaExceptionFilter implements ExceptionFilter {
         });
       }
 
+      // O banco não respondeu: container parado, porta errada, rede caída.
+      // Não é culpa de quem fez a requisição, por isso 503 e não 500.
+      case 'P1001':
+      case 'P1002':
+        this.logger.error(`Banco inacessível (${exception.code})`);
+        return response.status(HttpStatus.SERVICE_UNAVAILABLE).json({
+          statusCode: HttpStatus.SERVICE_UNAVAILABLE,
+          error: 'Service Unavailable',
+          message:
+            'Não foi possível conectar ao banco de dados. ' +
+            'Verifique se ele está no ar (docker compose up -d).',
+        });
+
       default:
         // Códigos não tratados continuam como 500, mas ficam registrados no log.
         this.logger.error(

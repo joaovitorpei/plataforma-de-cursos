@@ -7,17 +7,18 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 
 import { Perfis } from '../auth/perfis.decorator';
-import { Publico } from '../auth/publico.decorator';
-import { Logado, ehAdmin } from '../auth/usuario-logado';
+import { Logado, ehAdmin, ehEquipe } from '../auth/usuario-logado';
 import type { UsuarioLogado } from '../auth/usuario-logado';
 import { Perfil } from '../generated/prisma/enums';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
@@ -31,30 +32,42 @@ export class UsuariosController {
   constructor(private readonly usuariosService: UsuariosService) {}
 
   /**
-   * Cadastro — a única rota pública junto com o login.
-   *
-   * A pessoa escolhe aqui se é aluno (USER) ou professor (ADMIN). Foi uma
-   * decisão de projeto: facilita a demonstração e o uso em sala. Vale saber
-   * que, num sistema aberto ao público, essa escolha precisaria de alguma
-   * trava — convite, código de instrutor ou aprovação — senão qualquer pessoa
-   * se promoveria a administrador. A autorização em si continua valendo: um
-   * USER realmente não consegue criar nem apagar nada do catálogo.
+   * Criação de conta pelo administrador — é por aqui que nascem as contas de
+   * professor. O aluno que se inscreve sozinho usa POST /auth/cadastrar, que
+   * é público e sempre cria USER.
    */
-  @Publico()
+  @Perfis(Perfil.ADMIN)
   @Post()
-  @ApiOperation({ summary: 'Cadastrar um novo usuário (aluno ou professor)' })
+  @ApiOperation({
+    summary: 'Criar conta com perfil definido (administrador)',
+  })
   @ApiResponse({ status: 201, description: 'Usuário criado com sucesso.' })
-  @ApiResponse({ status: 400, description: 'Dados inválidos.' })
+  @ApiResponse({ status: 403, description: 'Restrito ao administrador.' })
   create(@Body() createUsuarioDto: CreateUsuarioDto) {
     return this.usuariosService.create(createUsuarioDto);
   }
 
-  @Perfis(Perfil.ADMIN)
+  /**
+   * Lista usuários. O professor também precisa disto — é com esta lista que
+   * ele escolhe o aluno ao lançar matrícula, avaliação ou certificado.
+   *
+   * O `?perfil=` filtra por tipo de conta, e é o que faz o campo "Aluno" de um
+   * formulário mostrar só alunos, e o campo "Instrutor" só professores.
+   */
+  @Perfis(Perfil.ADMIN, Perfil.INSTRUTOR)
   @Get()
-  @ApiOperation({ summary: 'Listar todos os usuários (administrador)' })
-  @ApiResponse({ status: 403, description: 'Restrito a administradores.' })
-  findAll() {
-    return this.usuariosService.findAll();
+  @ApiOperation({
+    summary: 'Listar usuários, opcionalmente filtrando por perfil',
+  })
+  @ApiQuery({
+    name: 'perfil',
+    required: false,
+    enum: Perfil,
+    description: 'Deixe em branco para trazer todos.',
+  })
+  @ApiResponse({ status: 403, description: 'Restrito à equipe da plataforma.' })
+  findAll(@Query('perfil') perfil?: string) {
+    return this.usuariosService.findAll(perfil);
   }
 
   /** O aluno enxerga o próprio cadastro; o administrador enxerga qualquer um. */
@@ -102,7 +115,7 @@ export class UsuariosController {
 
   /** Deixa passar o próprio usuário ou qualquer administrador. */
   private somenteDonoOuAdmin(id: number, logado: UsuarioLogado): void {
-    if (ehAdmin(logado) || logado.idUsuario === id) return;
+    if (ehEquipe(logado) || logado.idUsuario === id) return;
     throw new ForbiddenException('Você só pode acessar o seu próprio cadastro');
   }
 }

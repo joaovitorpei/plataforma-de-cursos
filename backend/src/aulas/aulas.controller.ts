@@ -27,13 +27,16 @@ import { Perfil } from '../generated/prisma/enums';
 export class AulasController {
   constructor(private readonly aulasService: AulasService) {}
 
-  @Perfis(Perfil.ADMIN)
+  @Perfis(Perfil.ADMIN, Perfil.INSTRUTOR)
   @Post()
   @ApiOperation({ summary: 'Cadastrar uma nova aula' })
   @ApiResponse({ status: 201, description: 'Aula criada com sucesso.' })
   @ApiResponse({ status: 400, description: 'Dados inválidos.' })
-  create(@Body() createAulaDto: CreateAulaDto) {
-    return this.aulasService.create(createAulaDto);
+  create(
+    @Body() createAulaDto: CreateAulaDto,
+    @Logado() logado: UsuarioLogado,
+  ) {
+    return this.aulasService.create(createAulaDto, logado);
   }
 
   @Get()
@@ -48,17 +51,21 @@ export class AulasController {
     return this.aulasService.findOne(+id, logado);
   }
 
-  @Perfis(Perfil.ADMIN)
+  @Perfis(Perfil.ADMIN, Perfil.INSTRUTOR)
   @Patch(':id')
   @ApiOperation({ summary: 'Atualizar uma aula' })
-  update(@Param('id') id: string, @Body() updateAulaDto: UpdateAulaDto) {
-    return this.aulasService.update(+id, updateAulaDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateAulaDto: UpdateAulaDto,
+    @Logado() logado: UsuarioLogado,
+  ) {
+    return this.aulasService.update(+id, updateAulaDto, logado);
   }
 
-  @Perfis(Perfil.ADMIN)
+  @Perfis(Perfil.ADMIN, Perfil.INSTRUTOR)
   @Delete(':id')
   @ApiOperation({ summary: 'Remover uma aula' })
-  remove(@Param('id') id: string) {
-    return this.aulasService.remove(+id);
+  remove(@Param('id') id: string, @Logado() logado: UsuarioLogado) {
+    return this.aulasService.remove(+id, logado);
   }
 }

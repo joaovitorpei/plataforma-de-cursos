@@ -16,11 +16,14 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { Perfis } from '../auth/perfis.decorator';
+import { Perfil } from '../generated/prisma/enums';
 import { Logado } from '../auth/usuario-logado';
 import type { UsuarioLogado } from '../auth/usuario-logado';
 
 @ApiTags('pagamentos')
 @ApiBearerAuth('token')
+@Perfis(Perfil.USER, Perfil.ADMIN)
 @Controller('pagamentos')
 export class PagamentosController {
   constructor(private readonly pagamentosService: PagamentosService) {}

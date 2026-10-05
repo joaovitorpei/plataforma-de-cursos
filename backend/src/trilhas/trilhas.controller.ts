@@ -25,7 +25,7 @@ import { Perfil } from '../generated/prisma/enums';
 export class TrilhasController {
   constructor(private readonly trilhasService: TrilhasService) {}
 
-  @Perfis(Perfil.ADMIN)
+  @Perfis(Perfil.ADMIN, Perfil.INSTRUTOR)
   @Post()
   @ApiOperation({ summary: 'Cadastrar uma nova trilha' })
   @ApiResponse({ status: 201, description: 'Trilha criada com sucesso.' })
@@ -46,14 +46,14 @@ export class TrilhasController {
     return this.trilhasService.findOne(+id);
   }
 
-  @Perfis(Perfil.ADMIN)
+  @Perfis(Perfil.ADMIN, Perfil.INSTRUTOR)
   @Patch(':id')
   @ApiOperation({ summary: 'Atualizar uma trilha' })
   update(@Param('id') id: string, @Body() updateTrilhaDto: UpdateTrilhaDto) {
     return this.trilhasService.update(+id, updateTrilhaDto);
   }
 
-  @Perfis(Perfil.ADMIN)
+  @Perfis(Perfil.ADMIN, Perfil.INSTRUTOR)
   @Delete(':id')
   @ApiOperation({ summary: 'Remover uma trilha' })
   remove(@Param('id') id: string) {

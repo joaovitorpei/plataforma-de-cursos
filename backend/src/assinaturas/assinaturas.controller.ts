@@ -16,11 +16,14 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { Perfis } from '../auth/perfis.decorator';
+import { Perfil } from '../generated/prisma/enums';
 import { Logado } from '../auth/usuario-logado';
 import type { UsuarioLogado } from '../auth/usuario-logado';
 
 @ApiTags('assinaturas')
 @ApiBearerAuth('token')
+@Perfis(Perfil.USER, Perfil.ADMIN)
 @Controller('assinaturas')
 export class AssinaturasController {
   constructor(private readonly assinaturasService: AssinaturasService) {}

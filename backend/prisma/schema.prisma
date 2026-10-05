@@ -18,10 +18,14 @@ datasource db {
 // ------------------------------------------------------------
 
 /// Define o que cada pessoa pode fazer na plataforma.
-/// USER  - aluno: vê o catálogo, se matricula, assiste e paga o que é seu.
-/// ADMIN - administrador/professor: mantém o catálogo e gerencia usuários.
+/// USER      - aluno: vê o catálogo, se matricula, assiste e paga o que é seu.
+/// INSTRUTOR - professor: mantém o catálogo e acompanha os alunos, mas não
+///             mexe na parte financeira.
+/// ADMIN     - dono: tudo, inclusive planos, assinaturas e pagamentos, e é
+///             quem cria as contas de professor.
 enum Perfil {
   USER
+  INSTRUTOR
   ADMIN
 }
 

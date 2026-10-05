@@ -17,6 +17,8 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Perfis } from '../auth/perfis.decorator';
+import { Logado } from '../auth/usuario-logado';
+import type { UsuarioLogado } from '../auth/usuario-logado';
 import { Perfil } from '../generated/prisma/enums';
 
 @ApiTags('cursos')
@@ -25,13 +27,16 @@ import { Perfil } from '../generated/prisma/enums';
 export class CursosController {
   constructor(private readonly cursosService: CursosService) {}
 
-  @Perfis(Perfil.ADMIN)
+  @Perfis(Perfil.ADMIN, Perfil.INSTRUTOR)
   @Post()
   @ApiOperation({ summary: 'Cadastrar um novo curso' })
   @ApiResponse({ status: 201, description: 'Curso criado com sucesso.' })
   @ApiResponse({ status: 400, description: 'Dados inválidos.' })
-  create(@Body() createCursoDto: CreateCursoDto) {
-    return this.cursosService.create(createCursoDto);
+  create(
+    @Body() createCursoDto: CreateCursoDto,
+    @Logado() logado: UsuarioLogado,
+  ) {
+    return this.cursosService.create(createCursoDto, logado);
   }
 
   @Get()
@@ -46,17 +51,21 @@ export class CursosController {
     return this.cursosService.findOne(+id);
   }
 
-  @Perfis(Perfil.ADMIN)
+  @Perfis(Perfil.ADMIN, Perfil.INSTRUTOR)
   @Patch(':id')
   @ApiOperation({ summary: 'Atualizar um curso' })
-  update(@Param('id') id: string, @Body() updateCursoDto: UpdateCursoDto) {
-    return this.cursosService.update(+id, updateCursoDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateCursoDto: UpdateCursoDto,
+    @Logado() logado: UsuarioLogado,
+  ) {
+    return this.cursosService.update(+id, updateCursoDto, logado);
   }
 
-  @Perfis(Perfil.ADMIN)
+  @Perfis(Perfil.ADMIN, Perfil.INSTRUTOR)
   @Delete(':id')
   @ApiOperation({ summary: 'Remover um curso' })
-  remove(@Param('id') id: string) {
-    return this.cursosService.remove(+id);
+  remove(@Param('id') id: string, @Logado() logado: UsuarioLogado) {
+    return this.cursosService.remove(+id, logado);
   }
 }

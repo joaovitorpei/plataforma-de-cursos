@@ -28,7 +28,18 @@ export const Logado = createParamDecorator(
   },
 );
 
-/** Atalho usado nos services para decidir se pode mexer em registro alheio. */
+/** Só o dono da plataforma. Usado no que é financeiro. */
 export function ehAdmin(usuario: UsuarioLogado): boolean {
   return usuario.perfil === Perfil.ADMIN;
+}
+
+/**
+ * Quem trabalha na plataforma — professor ou dono.
+ *
+ * É este o atalho usado na regra de dono: o professor precisa enxergar as
+ * matrículas, o progresso e as avaliações de todos os alunos para acompanhar
+ * as turmas. O aluno continua vendo só o que é dele.
+ */
+export function ehEquipe(usuario: UsuarioLogado): boolean {
+  return usuario.perfil === Perfil.ADMIN || usuario.perfil === Perfil.INSTRUTOR;
 }

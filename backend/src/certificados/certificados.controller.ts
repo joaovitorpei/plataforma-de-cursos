@@ -27,19 +27,31 @@ import { Perfil } from '../generated/prisma/enums';
 export class CertificadosController {
   constructor(private readonly certificadosService: CertificadosService) {}
 
-  @Perfis(Perfil.ADMIN)
   @Post()
   @ApiOperation({ summary: 'Emitir um novo certificado' })
   @ApiResponse({ status: 201, description: 'Certificado emitido com sucesso.' })
   @ApiResponse({ status: 400, description: 'Dados inválidos.' })
-  create(@Body() createCertificadoDto: CreateCertificadoDto) {
-    return this.certificadosService.create(createCertificadoDto);
+  create(
+    @Body() createCertificadoDto: CreateCertificadoDto,
+    @Logado() logado: UsuarioLogado,
+  ) {
+    return this.certificadosService.create(createCertificadoDto, logado);
   }
 
   @Get()
   @ApiOperation({ summary: 'Listar todos os certificados' })
   findAll(@Logado() logado: UsuarioLogado) {
     return this.certificadosService.findAll(logado);
+  }
+
+  /** Quanto falta para o aluno poder emitir o certificado deste curso. */
+  @Get('elegibilidade/:idCurso')
+  @ApiOperation({ summary: 'Conferir se já dá para emitir o certificado' })
+  elegibilidade(
+    @Param('idCurso') idCurso: string,
+    @Logado() logado: UsuarioLogado,
+  ) {
+    return this.certificadosService.elegibilidade(logado.idUsuario, +idCurso);
   }
 
   @Get(':id')

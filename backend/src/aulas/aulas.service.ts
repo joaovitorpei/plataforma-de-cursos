@@ -1,19 +1,22 @@
 import { Injectable } from '@nestjs/common';
 
-import { ehAdmin } from '../auth/usuario-logado';
+import { exigirDonoDaAula, exigirDonoDoModulo } from '../auth/dono-do-curso';
+import { ehEquipe } from '../auth/usuario-logado';
 import type { UsuarioLogado } from '../auth/usuario-logado';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateAulaDto } from './dto/create-aula.dto';
 import { UpdateAulaDto } from './dto/update-aula.dto';
 
-/** "todos" vale para o administrador, que enxerga o conteúdo de tudo. */
+/** "todos" vale para a equipe — professor e dono veem o conteúdo de tudo. */
 type CursosLiberados = Set<number> | 'todos';
 
 @Injectable()
 export class AulasService {
   constructor(private prisma: PrismaService) {}
 
-  create(createAulaDto: CreateAulaDto) {
+  /** Só dá para pendurar aula em módulo de curso seu. */
+  async create(createAulaDto: CreateAulaDto, logado: UsuarioLogado) {
+    await exigirDonoDoModulo(this.prisma, createAulaDto.idModulo, logado);
     return this.prisma.aula.create({ data: createAulaDto });
   }
 
@@ -43,14 +46,26 @@ export class AulasService {
     return this.aplicarAcesso(aula, liberados);
   }
 
-  update(id: number, updateAulaDto: UpdateAulaDto) {
+  async update(
+    id: number,
+    updateAulaDto: UpdateAulaDto,
+    logado: UsuarioLogado,
+  ) {
+    await exigirDonoDaAula(this.prisma, id, logado);
+
+    // Mover a aula para outro módulo exige ser dono do destino também.
+    if (updateAulaDto.idModulo !== undefined) {
+      await exigirDonoDoModulo(this.prisma, updateAulaDto.idModulo, logado);
+    }
+
     return this.prisma.aula.update({
       where: { idAula: id },
       data: updateAulaDto,
     });
   }
 
-  remove(id: number) {
+  async remove(id: number, logado: UsuarioLogado) {
+    await exigirDonoDaAula(this.prisma, id, logado);
     return this.prisma.aula.delete({ where: { idAula: id } });
   }
 
@@ -58,7 +73,7 @@ export class AulasService {
   private async cursosLiberados(
     logado: UsuarioLogado,
   ): Promise<CursosLiberados> {
-    if (ehAdmin(logado)) return 'todos';
+    if (ehEquipe(logado)) return 'todos';
 
     const matriculas = await this.prisma.matricula.findMany({
       where: { idUsuario: logado.idUsuario },

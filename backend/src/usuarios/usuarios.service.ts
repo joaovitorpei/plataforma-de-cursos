@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt'; // biblioteca para gerar o hash da senha
+import { Perfil } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
@@ -16,8 +17,21 @@ export class UsuariosService {
     });
   }
 
-  findAll() {
-    return this.prisma.usuario.findMany();
+  /**
+   * `perfil` vem da query string, então chega como texto solto. Só filtramos
+   * quando o valor é um perfil de verdade — qualquer outra coisa é ignorada e
+   * a lista sai completa.
+   */
+  findAll(perfil?: string) {
+    const valido =
+      perfil === Perfil.USER ||
+      perfil === Perfil.INSTRUTOR ||
+      perfil === Perfil.ADMIN;
+
+    return this.prisma.usuario.findMany({
+      where: valido ? { perfil } : undefined,
+      orderBy: { nomeCompleto: 'asc' },
+    });
   }
 
   findOne(id: number) {
