@@ -6,12 +6,25 @@ Escolhi esses dois porque é neles que mora tudo o que os outros 13 recursos
 (cursos, categorias, planos…) apenas **usam**: a senha com hash, o login, o
 token e as regras de quem pode o quê.
 
-A plataforma tem dois tipos de conta:
+A plataforma tem **três** tipos de conta:
 
 | Perfil | Quem é | O que faz |
 |---|---|---|
 | **USER** | aluno | vê o catálogo, se matricula, assiste ao que comprou, avalia e paga o que é seu |
-| **ADMIN** | professor | tudo isso **mais** criar, editar e excluir cursos, aulas, categorias e planos |
+| **INSTRUTOR** | professor | mantém **os próprios** cursos, módulos e aulas, e acompanha os alunos. Não mexe no financeiro |
+| **ADMIN** | dono | tudo, inclusive planos e pagamentos, e é quem cria as contas da equipe |
+
+E quatro regras que se somam, cada uma respondendo uma pergunta diferente:
+
+| Regra | Pergunta | Onde mora |
+|---|---|---|
+| **Autenticação** | Quem é você? | `jwt-auth.guard.ts` |
+| **Perfil** | Seu tipo de conta permite isso? | `perfis.guard.ts` |
+| **Dono do registro** | Esta matrícula é sua? | `propriedade.ts` |
+| **Dono do curso** | Este curso é seu? | `dono-do-curso.ts` |
+
+As duas primeiras são decididas antes do controller, só com o token. As duas
+últimas precisam ir ao banco — por isso vivem no service.
 
 ---
 
@@ -178,30 +191,39 @@ para **todas as rotas da aplicação**, sem precisar repetir `@UseGuards` em cad
 controller. Isso inverte o padrão — em vez de lembrar de proteger cada rota, é
 preciso lembrar de **liberar** as poucas que devem ficar abertas.
 
-As duas exceções são o cadastro e o login, marcadas com `@Publico()`:
+As duas exceções estão no `AuthController`, marcadas com `@Publico()`:
 
 ```ts
-@Publico()
-@Post()
-create(@Body() createUsuarioDto: CreateUsuarioDto) { ... }
+@Publico() @Post('login')      // POST /auth/login
+@Publico() @Post('cadastrar')  // POST /auth/cadastrar
 ```
 
 Sem elas, ninguém conseguiria entrar na plataforma: para ter token é preciso
 logar, e para logar é preciso ter conta. Um nó impossível.
 
+> **Repare onde o cadastro mora.** Ele é `POST /auth/cadastrar`, não
+> `POST /usuarios`. São coisas diferentes:
+>
+> | Rota | Quem usa | O que cria |
+> |---|---|---|
+> | `POST /auth/cadastrar` | qualquer visitante | sempre **aluno** |
+> | `POST /usuarios` | só o **ADMIN** | conta com o perfil que ele escolher |
+>
+> Separar as duas é o que impede alguém de se promover a professor sozinho: o
+> DTO do cadastro público (`CadastroDto`) **não tem** o campo `perfil`.
+
 ### As quatro marcações que aparecem nas rotas
 
 ```ts
-@Perfis(Perfil.ADMIN)        // só professor
-@Get()
-@ApiOperation({ ... })
-findAll() { ... }
+@Perfis(Perfil.ADMIN, Perfil.INSTRUTOR)   // equipe: professor ou dono
+@Delete(':id')
+remove(...) { ... }
 ```
 
 | Marcação | O que faz |
 |---|---|
 | `@Publico()` | libera a rota de qualquer token |
-| `@Perfis(Perfil.ADMIN)` | exige que o perfil no token seja ADMIN; aluno leva 403 |
+| `@Perfis(...)` | exige um dos perfis listados; quem não tem leva 403 |
 | `@Logado()` | injeta quem está logado como parâmetro do método |
 | `@ApiBearerAuth('token')` | só documentação: faz o cadeado 🔒 aparecer no Swagger |
 
@@ -414,28 +436,49 @@ Em projetos com **TypeORM** em vez de Prisma, é nessa classe que ficariam os
 
 ## 8. A pasta `auth/` — autenticação e autorização
 
-São dez arquivos, e eles resolvem **duas perguntas diferentes**. Separar as duas
-é a ideia central desta pasta:
+São doze arquivos, e eles resolvem **duas perguntas diferentes**. Separar as
+duas é a ideia central desta pasta:
 
 | Pergunta | Nome técnico | Quem responde |
 |---|---|---|
 | *Quem é você?* | **autenticação** | `jwt.strategy.ts` + `jwt-auth.guard.ts` |
-| *Você pode fazer isso?* | **autorização** | `perfis.guard.ts` + `propriedade.ts` |
+| *Você pode fazer isso?* | **autorização** | `perfis.guard.ts`, `propriedade.ts`, `dono-do-curso.ts` |
 
 ```
 auth/
-├── dto/login.dto.ts        formato do login
-├── auth.controller.ts      POST /auth/login
-├── auth.service.ts         confere a senha e assina o token
+├── dto/
+│   ├── login.dto.ts        e-mail + senha
+│   └── cadastro.dto.ts     cadastro público — SEM o campo perfil
+├── auth.controller.ts      POST /auth/login e /auth/cadastrar
+├── auth.service.ts         confere a senha, assina o token, cria aluno
 ├── auth.module.ts          amarra tudo
 ├── jwt.strategy.ts         ensina a ler o token
-├── jwt-auth.guard.ts       exige o token          ← autenticação
+├── jwt-auth.guard.ts       exige o token            ← autenticação
 ├── publico.decorator.ts    @Publico() — libera a rota
-├── perfis.decorator.ts     @Perfis(ADMIN)
-├── perfis.guard.ts         confere o perfil        ← autorização
-├── usuario-logado.ts       @Logado() e o tipo UsuarioLogado
-└── propriedade.ts          regra de dono           ← autorização
+├── perfis.decorator.ts     @Perfis(ADMIN, INSTRUTOR)
+├── perfis.guard.ts         confere o perfil          ← autorização
+├── usuario-logado.ts       @Logado(), ehAdmin(), ehEquipe()
+├── propriedade.ts          "esta matrícula é minha?" ← autorização
+└── dono-do-curso.ts        "este curso é meu?"       ← autorização
 ```
+
+### `ehAdmin` e `ehEquipe` — dois atalhos, dois sentidos
+
+```ts
+export function ehAdmin(u: UsuarioLogado) {
+  return u.perfil === Perfil.ADMIN;             // só o dono
+}
+
+export function ehEquipe(u: UsuarioLogado) {
+  return u.perfil === Perfil.ADMIN || u.perfil === Perfil.INSTRUTOR;
+}
+```
+
+A escolha entre os dois decide muita coisa:
+
+- **`ehEquipe`** nas listagens de alunos — o professor precisa ver as
+  matrículas e o progresso de todos para acompanhar as turmas.
+- **`ehAdmin`** no financeiro e na troca de perfil — ali o professor não entra.
 
 ### `dto/login.dto.ts` — o formato do login
 
@@ -710,29 +753,70 @@ guard de auth.
 
 ---
 
-## 10. Os três grupos de recursos
+## 10. Os quatro grupos de recursos
 
 Os 14 recursos não são todos iguais. Eles se dividem conforme **quem pode
 mexer neles**.
 
-### Grupo 1 — o catálogo: só professor escreve
+### Grupo 1 — o catálogo compartilhado
 
-`categorias` · `cursos` · `modulos` · `aulas` · `trilhas` · `trilhas-cursos` ·
-`planos` · `certificados`
+`categorias` · `trilhas` · `trilhas-cursos`
 
-Todo mundo logado **lê**; só `ADMIN` cria, edita e apaga. No controller isso é
-uma linha por rota de escrita:
+Todo mundo logado **lê**; qualquer um da equipe escreve:
 
 ```ts
-@Perfis(Perfil.ADMIN)
+@Perfis(Perfil.ADMIN, Perfil.INSTRUTOR)
 @Delete(':id')
 remove(@Param('id') id: string) { ... }
 ```
 
-O service continua sendo o CRUD puro — ele nem sabe que existe perfil, porque o
-guard já barrou antes.
+Não têm dono porque são **taxonomia da plataforma**. "Programação" e "Banco de
+Dados" não pertencem a um professor — se cada um só pudesse editar as suas,
+apareceriam cinco categorias "Programação" diferentes.
 
-### Grupo 2 — os recursos do aluno: regra de dono
+### Grupo 2 — o conteúdo, que tem dono
+
+`cursos` · `modulos` · `aulas`
+
+A equipe escreve, **mas só no que é seu**. O dono de um curso é o instrutor
+dele (`Cursos.ID_Instrutor`), e a posse desce em cadeia:
+
+```
+Curso   -> ID_Instrutor diz o dono
+Módulo  -> pertence a um curso  -> mesmo dono
+Aula    -> pertence a um módulo -> pertence a um curso -> mesmo dono
+```
+
+Isso não cabe num decorator — o guard roda antes do controller e não conhece o
+banco. Então vive em `auth/dono-do-curso.ts`:
+
+```ts
+export async function exigirDonoDoCurso(prisma, idCurso, logado) {
+  if (ehAdmin(logado)) return;                  // o dono da plataforma passa
+
+  const curso = await prisma.curso.findUnique({
+    where: { idCurso },
+    select: { idInstrutor: true },
+  });
+  if (curso.idInstrutor !== logado.idUsuario) {
+    throw new ForbiddenException(
+      'Este conteúdo pertence a outro professor...',
+    );
+  }
+}
+```
+
+E tem uma proteção a mais na criação: o professor **não escolhe** de quem é o
+curso. O `idInstrutor` que vier no corpo é ignorado e trocado pelo dele.
+
+```ts
+idInstrutor: ehAdmin(logado) ? dados.idInstrutor : logado.idUsuario,
+```
+
+> Dá para provar isso num teste: mande `"idInstrutor": 999` ao criar um curso
+> como professor. Grava o id de quem está logado, não o 999.
+
+### Grupo 3 — os recursos do aluno: regra de dono
 
 `matriculas` · `avaliacoes` · `progresso-aulas` · `assinaturas` · `pagamentos`
 
@@ -742,13 +826,13 @@ decorator, porque depende do conteúdo do banco: para saber de quem é a matríc
 
 ```ts
 export function exigirDono(idDonoDoRegistro: number, logado: UsuarioLogado) {
-  if (ehAdmin(logado)) return;                       // professor passa sempre
+  if (ehEquipe(logado)) return;                      // equipe passa sempre
   if (logado.idUsuario === idDonoDoRegistro) return; // aluno passa se for dele
   throw new ForbiddenException('...');
 }
 
 export function filtroDoDono(logado: UsuarioLogado) {
-  return ehAdmin(logado) ? undefined : { idUsuario: logado.idUsuario };
+  return ehEquipe(logado) ? undefined : { idUsuario: logado.idUsuario };
 }
 ```
 
@@ -778,14 +862,32 @@ que filtra — é a API.
 > - **`pagamentos`** não guarda o id do usuário. Quem diz de quem ele é é a
 >   assinatura, então o service busca o dono lá antes de decidir.
 
-### Grupo 3 — `usuarios`, que é único
+### Grupo 4 — o financeiro e os usuários
+
+`planos` · `assinaturas` · `pagamentos` · `usuarios`
+
+Aqui o **professor não entra**. Dinheiro e contas são do dono da plataforma:
+
+```ts
+@Perfis(Perfil.USER, Perfil.ADMIN)   // repare quem NÃO está na lista
+@Controller('pagamentos')
+```
+
+O aluno continua vendo as próprias assinaturas e pagamentos — ele é quem paga.
+Quem fica de fora é o INSTRUTOR.
+
+`usuarios` é meio-termo: a equipe **lista** (o professor precisa escolher o
+aluno ao lançar matrícula), mas criar, excluir e trocar perfil é só do admin.
+E a listagem aceita `?perfil=USER`, que é o que faz o campo "Aluno" de um
+formulário mostrar só alunos.
+
+#### Por que `usuarios` é o recurso mais diferente de todos
 
 | Só em `usuarios` | Por quê |
 |---|---|
 | `bcrypt` no create e no update | é o único com senha |
 | `findByEmail` | o login precisa buscar por e-mail |
 | `omit` da senha no Prisma | é o único com campo que não pode vazar |
-| `@Publico()` no cadastro | é a porta de entrada da plataforma |
 | regra de dono **no controller** | depende só do id da URL, não do banco |
 | `exports` no module | é o único que outro módulo usa |
 
@@ -1007,9 +1109,33 @@ regra de dono. São dois guards separados, e dois códigos HTTP: **401** para a
 primeira, **403** para a segunda.
 
 **"Um aluno pode apagar um curso?"**
-Não. A rota tem `@Perfis(Perfil.ADMIN)` e a API responde **403**. A tela também
-esconde o botão, mas isso é só conveniência — a proteção de verdade está na API.
-Mesmo forçando a requisição pelo Swagger ou por curl, o aluno leva 403.
+Não. A rota exige `@Perfis(ADMIN, INSTRUTOR)` e a API responde **403**. A tela
+também esconde o botão, mas isso é só conveniência — a proteção de verdade está
+na API. Mesmo forçando pelo Swagger ou por curl, o aluno leva 403.
+
+**"E um professor pode apagar o curso de outro professor?"**
+Também não — e esse é mais interessante, porque o guard de perfil sozinho
+deixaria passar (os dois são INSTRUTOR). Quem barra é a regra de dono no
+service: ela busca o curso, compara `ID_Instrutor` com quem está logado e
+responde **403** se forem diferentes. Vale também para os módulos e as aulas
+daquele curso.
+
+**"Por que são três perfis e não dois?"**
+Porque professor e dono têm responsabilidades diferentes. O professor cuida do
+ensino — cursos, aulas, acompanhamento dos alunos. O dono cuida do negócio —
+planos, assinaturas, pagamentos e as contas da equipe. Juntar os dois num
+perfil só daria ao professor acesso ao caixa da plataforma.
+
+**"Como nasce o primeiro administrador, se só admin cria admin?"**
+É um problema do ovo e da galinha, e a saída é nascer fora da API: o comando
+`npm run admin-inicial` escreve direto no banco. Depois dele o fluxo normal
+assume — o admin cria os professores pela tela de Usuários.
+
+**"A tela de login deixa escolher o perfil. Não é um furo?"**
+Não, porque a aba **não concede** nada. Ela orienta. Se você entrar pela aba
+"Administrador" com uma conta de aluno, o login é desfeito e aparece "esta
+conta é de aluno". O perfil continua vindo da coluna `Perfil` da conta, e é o
+token assinado que o carrega.
 
 **"Onde fica guardado o perfil?"**
 Numa coluna `Perfil` da tabela `Usuarios`, como um **enum** do PostgreSQL com
@@ -1042,6 +1168,18 @@ Já a regra de perfil cabe num guard porque a resposta está no próprio token.
 Não. A API devolve `urlConteudo: null` e `liberada: false` para quem não está
 matriculado. O título e a duração vêm — para a pessoa decidir se quer o curso —
 mas o endereço do conteúdo não sai do servidor.
+
+**"Quem emite o certificado?"**
+O próprio aluno, quando termina. A API confere se ele tem progresso
+`Concluido` em **todas** as aulas do curso; se faltar uma, responde 403. A tela
+mostra uma barra "3 de 5 aulas" enquanto não fecha, e o botão de emitir quando
+fecha. Professor e dono também podem emitir manualmente para qualquer aluno.
+
+**"Uma matrícula com data de conclusão em 2027 está concluída?"**
+Não — está **prevista**. A situação tem três estados: sem data é "Em
+andamento", data futura é "Previsto para…", e só data que já passou vira
+"Concluído em…". Antes, qualquer data preenchida dizia "concluído", e um curso
+com término marcado para 2027 aparecia como terminado.
 
 **"Por que o perfil só muda depois de sair e entrar?"**
 Porque ele viaja dentro do token, que é emitido no login e vale 1 hora. É o
