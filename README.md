@@ -6,7 +6,8 @@ Plataforma de cursos (LAB03): API em **NestJS + Prisma + PostgreSQL** e interfac
 ```
 plataformaCursos/
 ├── backend/     API NestJS, Prisma e o PostgreSQL em Docker
-└── frontend/    EduCursos: a tela, em React + TypeScript + Vite + Bootstrap
+├── frontend/    EduCursos: a tela, em React + TypeScript + Vite + Bootstrap
+└── mobile/      app do celular, em React Native + Expo (JavaScript)
 ```
 
 A maior parte dos comandos deste guia roda dentro da pasta `backend`:
@@ -16,6 +17,7 @@ cd ~/TCS/plataformaCursos/backend
 ```
 
 O frontend tem guia próprio em [`frontend/README.md`](frontend/README.md).
+O app mobile está explicado na seção [App mobile](#app-mobile-expo-go).
 
 ---
 
@@ -68,6 +70,67 @@ Para testar os dois lados, crie uma conta de cada.
 `Ctrl+C` derruba o que estiver naquele terminal.
 
 Para desligar o banco: `docker compose down` (os dados ficam salvos).
+
+---
+
+## App mobile (Expo Go)
+
+O app do celular fica em `mobile/`. Foi criado seguindo o *Tutorial React
+Native: Componentes, Flexbox e Navegação*:
+
+```bash
+npx create-expo-app@latest mobile --template blank
+```
+
+Por enquanto ele tem só a **tela de Login**: o botão ENTRAR confere se os
+campos foram preenchidos e se o e-mail é válido.
+
+```
+mobile/
+├── App.js                      mostra a tela de Login
+├── app.json                    nome do app (EduCursos)
+└── src/
+    ├── screens/LoginScreen.js  a tela: View, TextInput, TouchableOpacity, Flexbox
+    └── styles/theme.js         cores (as mesmas do site)
+```
+
+### 1. Preparar o celular (só na primeira vez)
+
+1. Instale o **Expo Go** pela App Store ou Play Store. Ele precisa ser da
+   versão que suporta o **SDK 58**, então atualize o app se ele reclamar.
+2. Crie uma conta Expo, de graça, em https://expo.dev, e entre com ela no Expo Go.
+3. **iPhone:** em *Ajustes → Expo Go*, ligue **Rede Local**. Sem isso, o
+   celular não encontra o notebook.
+
+### 2. Preparar o notebook (só na primeira vez)
+
+```bash
+cd ~/TCS/plataformaCursos/mobile
+npm install
+npx expo login        # a MESMA conta que está no Expo Go
+npx expo whoami       # deve mostrar o nome da sua conta
+```
+
+Se o Expo Go estiver logado e o notebook não, o celular mostra o erro
+*"You're signed in to Expo Go as ..., but not signed in to Expo CLI"*.
+
+### 3. Rodar
+
+Escolha o comando conforme a rede:
+
+| Situação | Comando |
+|---|---|
+| celular e notebook **no mesmo Wi-Fi** | `npx expo start` |
+| redes diferentes, celular no 4G, ou Wi-Fi que bloqueia (faculdade) | `npx expo start --tunnel` |
+
+Aparece um QR Code no terminal. Para abrir o app:
+
+- **iPhone:** aponte a **câmera** para o QR Code e toque em *Abrir no Expo Go*.
+  Ou abra o Expo Go: o projeto aparece em *Development servers*.
+- **Android:** abra o Expo Go e use *Scan QR code*.
+
+Ao salvar um arquivo, o celular atualiza sozinho. No terminal, `r` recarrega o
+app e `Ctrl+C` derruba o servidor.
 
 ---
 
@@ -371,6 +434,19 @@ A aplicação não sobe sem a chave. Confira se a linha `JWT_SECRET=` existe no
 **`Missing script: start:dev`**
 Você está na pasta errada. Precisa estar em `backend`.
 
+**Expo: `Couldn't create a signed tunnel URL ... You're not logged in`**
+O `--tunnel` exige login. Rode `npx expo login` dentro de `mobile`, ou use
+`npx expo start --tunnel ngrok`, que não precisa de conta.
+
+**Expo Go: `signed in to Expo Go as "...", but not signed in to Expo CLI`**
+Faltou entrar com a mesma conta no notebook: `npx expo login`.
+
+**Expo Go fica carregando e não abre o projeto**
+O celular não alcança o notebook. Confira se os dois estão no mesmo Wi-Fi, se o
+iPhone tem a permissão de **Rede Local** ligada e se o firewall não bloqueia a
+porta 8081 (`sudo ufw allow 8081/tcp`). Se a rede isola os aparelhos, use
+`npx expo start --tunnel`.
+
 ---
 
 ## Tecnologias
@@ -380,3 +456,5 @@ Swagger · JWT (Passport) · bcrypt
 
 **Frontend:** React 19 · TypeScript · Vite · **Bootstrap 5** (tema próprio via
 Sass) · React Router · zod
+
+**Mobile:** React Native · Expo (SDK 58) · Expo Go · JavaScript
